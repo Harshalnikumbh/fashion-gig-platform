@@ -1,21 +1,19 @@
-/* AtelierX — main.js */
-
-// ---- Navbar scroll effect ----
 const navbar = document.querySelector('.navbar');
 if (navbar) {
   window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 20);
   });
 }
-
 // ---- Hamburger (mobile) ----
 const hamburger = document.getElementById('hamburger');
 if (hamburger) {
+  let menuOpen = false;
   hamburger.addEventListener('click', () => {
+    menuOpen = !menuOpen;
     const nav = document.querySelector('.nav-links');
     const cta = document.querySelector('.nav-cta');
-    if (nav) nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-    if (cta) cta.style.display = cta.style.display === 'flex' ? 'none' : 'flex';
+    if (nav) nav.style.display = menuOpen ? 'flex' : 'none';
+    if (cta) cta.style.display = menuOpen ? 'flex' : 'none';
   });
 }
 
@@ -116,9 +114,54 @@ if (signupForm) {
 
 const signinForm = document.getElementById('signinForm');
 if (signinForm) {
-  signinForm.addEventListener('submit', (e) => {
+  signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // TODO: wire to Flask backend
-    alert('Sign in successful! (Connect to Flask backend to proceed)');
+    const message = document.getElementById('signinMessage');
+    const submitBtn = signinForm.querySelector('.btn-submit');
+
+    if (message) {
+      message.hidden = true;
+      message.textContent = '';
+      message.classList.remove('is-error');
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing In...';
+    }
+
+    try {
+      const response = await fetch(signinForm.action || '/signin', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: new FormData(signinForm)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success && result.redirect) {
+        window.location.href = result.redirect;
+        return;
+      }
+
+      if (message) {
+        message.textContent = result.message || 'Unable to sign in.';
+        message.hidden = false;
+        message.classList.add('is-error');
+      }
+    } catch (error) {
+      if (message) {
+        message.textContent = 'Network error. Please try again.';
+        message.hidden = false;
+        message.classList.add('is-error');
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In →';
+      }
+    }
   });
 }

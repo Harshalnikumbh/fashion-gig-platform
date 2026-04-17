@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── RESET & BASE  */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A96E;
+      --gold-light: #e8d5b7;
+      --gold-dim: rgba(201,169,110,0.15);
+      --ink: #1a1a1a;
+      --ink2: #3a3a3a;
+      --muted: #888;
+      --surface: #faf8f5;
+      --white: #ffffff;
+      --sidebar-w: 240px;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ───────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--ink);
+      min-height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0 24px;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      padding: 0 24px 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-brand svg { height: 32px; }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #a07840);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: var(--white);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .user-meta span {
+      display: block;
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .user-meta small {
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      list-style: none;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      padding: 14px 24px 6px;
+    }
+
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 24px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 400;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav li a:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .sidebar-nav li a.active {
+      color: var(--gold);
+      border-left-color: var(--gold);
+      background: rgba(201,169,110,0.08);
+    }
+
+    .sidebar-nav li a .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-bottom {
+      padding: 16px 24px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-bottom a {
+      display: flex; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      text-decoration: none;
+      padding: 8px 0;
+      transition: color 0.2s;
+    }
+
+    .sidebar-bottom a:hover { color: rgba(255,255,255,0.7); }
+
+    /* ── MAIN CONTENT  */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP BAR ───────────────────────────────────── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid #ede9e2;
+      padding: 0 36px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+    }
+
+    .topbar-left h2 em { color: var(--gold); font-style: italic; }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid #e5e0d8;
+      border-radius: 50px;
+      padding: 7px 16px;
+      min-width: 220px;
+    }
+
+    .search-bar input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      width: 100%;
+    }
+
+    .search-bar input::placeholder { color: var(--muted); }
+
+    .notif-btn {
+      width: 38px; height: 38px;
+      background: var(--surface);
+      border: 1px solid #e5e0d8;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      position: relative;
+    }
+
+    .notif-dot {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: absolute;
+      top: 6px; right: 6px;
+      border: 2px solid var(--white);
+    }
+
+    /* ── PAGE BODY ─────────────────────────────────── */
+    .page-body {
+      padding: 32px 36px 48px;
+    }
+
+    /* ── WELCOME BANNER ────────────────────────────── */
+    .welcome-banner {
+      background: var(--ink);
+      border-radius: var(--radius);
+      padding: 28px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(201,169,110,0.18) 0%, transparent 60%);
+    }
+
+    .welcome-text { position: relative; }
+
+    .welcome-text p {
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .welcome-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .welcome-text h1 em { color: var(--gold); font-style: italic; }
+
+    .welcome-text small {
+      display: block;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .welcome-stats {
+      display: flex;
+      gap: 28px;
+      position: relative;
+    }
+
+    .w-stat { text-align: center; }
+
+    .w-stat strong {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    .w-stat span {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── SECTION HEADER ────────────────────────────── */
+    .section-hd {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-hd h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 400;
+    }
+
+    .section-hd h3 em { color: var(--gold); font-style: italic; }
+
+    .section-hd a {
+      font-size: 12px;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── CONTINUE LEARNING ─────────────────────────── */
+    .continue-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .course-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.22s, box-shadow 0.22s;
+      cursor: pointer;
+    }
+
+    .course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.11);
+    }
+
+    .course-thumb {
+      height: 130px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ct1 { background: linear-gradient(135deg, #2c1f12, #6b4c2a); }
+    .ct2 { background: linear-gradient(135deg, #1a2035, #3a4f7a); }
+    .ct3 { background: linear-gradient(135deg, #1f2c1a, #3a6b35); }
+
+    .thumb-label {
+      position: absolute;
+      bottom: 10px; left: 12px;
+      background: var(--gold);
+      color: var(--white);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .thumb-play {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      color: var(--white);
+      backdrop-filter: blur(6px);
+      transition: background 0.2s;
+    }
+
+    .course-card:hover .thumb-play { background: rgba(201,169,110,0.5); }
+
+    .course-info { padding: 14px 16px 16px; }
+
+    .course-info h4 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .course-info small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .progress-wrap { margin-top: 12px; }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: #ede9e2;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #a07840);
+      border-radius: 10px;
+    }
+
+    /* ── TABS ──────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #ede9e2;
+      border-radius: 10px;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      padding: 7px 18px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    /* ── VIDEO LIBRARY ─────────────────────────────── */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .video-card {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .video-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+    }
+
+    .video-thumb {
+      height: 110px;
+      position: relative;
+    }
+
+    .vt1 { background: linear-gradient(135deg, #3d1f2c, #7a3a56); }
+    .vt2 { background: linear-gradient(135deg, #1f2d3d, #3a6070); }
+    .vt3 { background: linear-gradient(135deg, #2d2d1f, #6b6b35); }
+    .vt4 { background: linear-gradient(135deg, #1f3d2d, #356b54); }
+
+    .video-dur {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(0,0,0,0.65);
+      color: var(--white);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .v-play {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px; height: 36px;
+      background: rgba(201,169,110,0.25);
+      border: 1px solid rgba(201,169,110,0.6);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      color: var(--white);
+    }
+
+    .video-meta { padding: 12px; }
+
+    .video-meta h5 {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .video-meta small { font-size: 11px; color: var(--muted); }
+
+    .video-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+    .v-tag {
+      font-size: 10px;
+      background: var(--gold-dim);
+      color: #8a6535;
+      padding: 3px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── GIG SECTION ───────────────────────────────── */
+    .gig-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .gig-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border-left: 3px solid var(--gold-light);
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .gig-card:hover {
+      border-left-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .gig-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .gig-badge {
+      font-size: 10px;
+      background: var(--gold-dim);
+      color: #8a6535;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .gig-badge.urgent {
+      background: rgba(220, 80, 80, 0.1);
+      color: #c03030;
+    }
+
+    .gig-card h4 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .gig-card p {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .gig-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .gig-budget {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    .gig-meta-row { display: flex; gap: 10px; }
+
+    .gig-meta-item {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-apply {
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-apply:hover { background: #333; }
+
+    /* ── SKILL PROGRESS ────────────────────────────── */
+    .skill-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .skill-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .skill-card h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      margin-bottom: 18px;
+    }
+
+    .skill-item {
+      margin-bottom: 14px;
+    }
+
+    .skill-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+      color: var(--ink2);
+    }
+
+    .skill-label span:last-child { color: var(--muted); }
+
+    .skill-bar {
+      height: 6px;
+      background: #ede9e2;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #a07840);
+      border-radius: 10px;
+      transition: width 1s ease;
+    }
+
+    /* ── UPCOMING ──────────────────────────────────── */
+    .upcoming-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .upcoming-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0ece5;
+    }
+
+    .upcoming-item:last-child { border-bottom: none; }
+
+    .up-date {
+      width: 44px; height: 44px;
+      background: var(--gold-dim);
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .up-date strong {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .up-date span { font-size: 9px; color: var(--muted); }
+
+    .up-info h5 { font-size: 13px; font-weight: 500; }
+    .up-info small { font-size: 11px; color: var(--muted); }
+
+    /* ── RESPONSIVE ────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .continue-grid, .gig-grid { grid-template-columns: repeat(2, 1fr); }
+      .video-grid { grid-template-columns: repeat(2, 1fr); }
+      .skill-section { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+      .continue-grid, .gig-grid, .video-grid { grid-template-columns: 1fr; }
+      .welcome-stats { display: none; }
+      .page-body { padding: 20px; }
+      .topbar { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">S</div>
+      <div class="user-meta">
+        <span>Sanjivani Sharma</span>
+        <small>🌸 Learner</small>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="nav-section-label">Main</li>
+      <li><a href="#" class="active"><span class="nav-icon">🏠</span> Dashboard</a></li>
+      <li><a href="#"><span class="nav-icon">📚</span> My Courses</a></li>
+      <li><a href="#"><span class="nav-icon">🎬</span> Video Library</a></li>
+      <li><a href="#"><span class="nav-icon">📁</span> My Portfolio</a></li>
+
+      <li class="nav-section-label">Opportunities</li>
+      <li><a href="#"><span class="nav-icon">🪡</span> Browse Gigs</a></li>
+      <li><a href="#"><span class="nav-icon">💼</span> My Applications</a></li>
+      <li><a href="#"><span class="nav-icon">⭐</span> Saved</a></li>
+
+      <li class="nav-section-label">Community</li>
+      <li><a href="#"><span class="nav-icon">🎨</span> Style Boards</a></li>
+      <li><a href="#"><span class="nav-icon">💬</span> Critiques</a></li>
+      <li><a href="#"><span class="nav-icon">🏅</span> Leaderboard</a></li>
+    </ul>
+
+    <div class="sidebar-bottom">
+      <a href="#"><span>⚙️</span> Settings</a>
+      <a href="/signin"><span>🚪</span> Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════ MAIN ═══════════════════════ -->
+  <div class="main">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2>My <em>Dashboard</em></h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Search courses, gigs…"/>
+        </div>
+        <div class="notif-btn">
+          🔔
+          <div class="notif-dot"></div>
+        </div>
+        <div class="user-avatar" style="width:36px;height:36px;font-size:15px">S</div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- WELCOME BANNER -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <p>✦ Good morning</p>
+          <h1>Welcome back, <em>Sanjivani</em></h1>
+          <small>You're on a 5-day learning streak. Keep it going! 🔥</small>
+        </div>
+        <div class="welcome-stats">
+          <div class="w-stat">
+            <strong>3</strong>
+            <span>Active Courses</span>
+          </div>
+          <div class="w-stat">
+            <strong>12</strong>
+            <span>Hours Learned</span>
+          </div>
+          <div class="w-stat">
+            <strong>2</strong>
+            <span>Gigs Applied</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTINUE LEARNING -->
+      <div class="section-hd">
+        <h3>Continue <em>Learning</em></h3>
+        <a href="#">View all courses →</a>
+      </div>
+      <div class="continue-grid">
+
+        <div class="course-card">
+          <div class="course-thumb ct1">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Draping</div>
+          </div>
+          <div class="course-info">
+            <h4>Fundamentals of Fabric Draping</h4>
+            <small>by Meera Kapoor</small>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 5 of 12</span><span>42%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-thumb ct2">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Patterns</div>
+          </div>
+          <div class="course-info">
+            <h4>Zero to Pro: Garment Patterns</h4>
+            <small>by Arjun Mehta</small>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 2 of 15</span><span>13%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:13%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-thumb ct3">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Illustration</div>
+          </div>
+          <div class="course-info">
+            <h4>Fashion Illustration for Beginners</h4>
+            <small>by Divya Rao</small>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 8 of 10</span><span>80%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIDEO LIBRARY -->
+      <div class="section-hd">
+        <h3>Browse <em>Video Library</em></h3>
+        <a href="#">Explore all →</a>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setTab(this)">All Videos</button>
+        <button class="tab-btn" onclick="setTab(this)">Draping</button>
+        <button class="tab-btn" onclick="setTab(this)">Stitching</button>
+        <button class="tab-btn" onclick="setTab(this)">Illustration</button>
+        <button class="tab-btn" onclick="setTab(this)">Sustainable</button>
+      </div>
+
+      <div class="video-grid">
+
+        <div class="video-card">
+          <div class="video-thumb vt1">
+            <div class="v-play">▶</div>
+            <div class="video-dur">18:34</div>
+          </div>
+          <div class="video-meta">
+            <h5>Advanced Saree Draping Techniques</h5>
+            <small>Meera Kapoor · 4.9 ⭐</small>
+            <div class="video-tags">
+              <span class="v-tag">Draping</span>
+              <span class="v-tag">Saree</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-thumb vt2">
+            <div class="v-play">▶</div>
+            <div class="video-dur">24:10</div>
+          </div>
+          <div class="video-meta">
+            <h5>Reading & Grading Pattern Sheets</h5>
+            <small>Arjun Mehta · 4.8 ⭐</small>
+            <div class="video-tags">
+              <span class="v-tag">Patterns</span>
+              <span class="v-tag">Grading</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-thumb vt3">
+            <div class="v-play">▶</div>
+            <div class="video-dur">12:55</div>
+          </div>
+          <div class="video-meta">
+            <h5>Croquis Figure Drawing — Fashion Poses</h5>
+            <small>Divya Rao · 4.7 ⭐</small>
+            <div class="video-tags">
+              <span class="v-tag">Illustration</span>
+              <span class="v-tag">Drawing</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-card">
+          <div class="video-thumb vt4">
+            <div class="v-play">▶</div>
+            <div class="video-dur">31:22</div>
+          </div>
+          <div class="video-meta">
+            <h5>Eco Fabrics & Sustainable Sourcing</h5>
+            <small>Priya Nair · 4.9 ⭐</small>
+            <div class="video-tags">
+              <span class="v-tag">Sustainable</span>
+              <span class="v-tag">Fabric</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SKILL PROGRESS + UPCOMING -->
+      <div class="skill-section">
+
+        <div class="skill-card">
+          <h4>Your Skill Progress</h4>
+          <div class="skill-item">
+            <div class="skill-label"><span>Fabric Draping</span><span>68%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:68%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span>Pattern Making</span><span>32%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:32%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span>Fashion Illustration</span><span>81%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:81%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span>Stitching & Tailoring</span><span>45%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:45%"></div></div>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <h4>Upcoming Sessions</h4>
+          <div class="upcoming-list">
+            <div class="upcoming-item">
+              <div class="up-date"><strong>19</strong><span>Apr</span></div>
+              <div class="up-info">
+                <h5>Live Q&A — Draping Masterclass</h5>
+                <small>Meera Kapoor · 4:00 PM IST</small>
+              </div>
+            </div>
+            <div class="upcoming-item">
+              <div class="up-date"><strong>22</strong><span>Apr</span></div>
+              <div class="up-info">
+                <h5>Workshop: Gig Portfolio Review</h5>
+                <small>AtelierX Team · 11:00 AM IST</small>
+              </div>
+            </div>
+            <div class="upcoming-item">
+              <div class="up-date"><strong>25</strong><span>Apr</span></div>
+              <div class="up-info">
+                <h5>Pattern Grading — Hands-on Lab</h5>
+                <small>Arjun Mehta · 3:30 PM IST</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- GIG OPPORTUNITIES -->
+      <div class="section-hd">
+        <h3>Explore <em>Gig Opportunities</em></h3>
+        <a href="#">Browse all gigs →</a>
+      </div>
+
+      <div class="gig-grid">
+
+        <div class="gig-card">
+          <div class="gig-top">
+            <span class="gig-badge urgent">🔴 Urgent</span>
+            <span style="font-size:11px;color:var(--muted)">2 days left</span>
+          </div>
+          <h4>Bridal Collection Designer — 12 Looks</h4>
+          <p>Looking for a skilled draper for a bridal trousseau line. Must know lehenga silhouettes and blouse patterns.</p>
+          <div class="gig-footer">
+            <div>
+              <div class="gig-budget">₹25,000 – ₹40,000</div>
+              <div class="gig-meta-row">
+                <span class="gig-meta-item">📍 Mumbai</span>
+                <span class="gig-meta-item">⏱ 3 weeks</span>
+              </div>
+            </div>
+            <button class="btn-apply">Apply →</button>
+          </div>
+        </div>
+
+        <div class="gig-card">
+          <div class="gig-top">
+            <span class="gig-badge">✂️ Pattern Making</span>
+            <span style="font-size:11px;color:var(--muted)">7 days left</span>
+          </div>
+          <h4>Streetwear Pattern Maker — Men's Line</h4>
+          <p>Youth streetwear brand needs pattern drafts for drop-shoulder tees, cargo trousers & hoodies in 3 sizes.</p>
+          <div class="gig-footer">
+            <div>
+              <div class="gig-budget">₹8,000 – ₹15,000</div>
+              <div class="gig-meta-row">
+                <span class="gig-meta-item">🌐 Remote</span>
+                <span class="gig-meta-item">⏱ 1 week</span>
+              </div>
+            </div>
+            <button class="btn-apply">Apply →</button>
+          </div>
+        </div>
+
+        <div class="gig-card">
+          <div class="gig-top">
+            <span class="gig-badge">🎨 Illustration</span>
+            <span style="font-size:11px;color:var(--muted)">12 days left</span>
+          </div>
+          <h4>Fashion Illustrator — Lookbook 2025</h4>
+          <p>Indie label needs 20 fashion illustrations for their upcoming spring/summer digital lookbook. Flat & croquis styles.</p>
+          <div class="gig-footer">
+            <div>
+              <div class="gig-budget">₹12,000 – ₹20,000</div>
+              <div class="gig-meta-row">
+                <span class="gig-meta-item">🌐 Remote</span>
+                <span class="gig-meta-item">⏱ 10 days</span>
+              </div>
+            </div>
+            <button class="btn-apply">Apply →</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+
+  <script>
+
+  function setTab(btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const selected = btn.textContent.trim();
+    document.querySelectorAll('.video-card').forEach(card => {
+      if (selected === 'All Videos') {
+        card.style.display = '';
+      } else {
+        const tags = Array.from(card.querySelectorAll('.v-tag')).map(t => t.textContent.trim());
+        card.style.display = tags.includes(selected) ? '' : 'none';
+      }
+    });
+  }
+  </script>
+</body>
+</html>
