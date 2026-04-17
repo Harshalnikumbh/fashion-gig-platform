@@ -13,6 +13,10 @@ class User(db.Model):
     password   = db.Column(db.String(256), nullable=False)
     role       = db.Column(db.String(10),  nullable=False)
     speciality = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    applications = db.relationship('Application', backref='applicant', lazy=True,
+                                   cascade='all, delete-orphan')
 
     courses     = db.relationship('Course',     backref='creator',  lazy=True)
     gigs        = db.relationship('Gig',        backref='creator',  lazy=True)
@@ -33,9 +37,36 @@ class Course(db.Model):
     creator_id  = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
 
     enrollments = db.relationship('Enrollment', backref='course', lazy=True)
+    lessons     = db.relationship('Lesson', backref='course', lazy=True,
+                                  cascade='all, delete-orphan',
+                                  order_by='Lesson.position')
+
+    @property
+    def lesson_count(self):
+        return len(self.lessons)
+
+    @property
+    def duration_hours(self):
+        total = sum(l.duration_seconds or 0 for l in self.lessons)
+        return round(total / 3600, 1) or 6
 
     def __repr__(self):
         return f'<Course {self.title}>'
+
+
+class Lesson(db.Model):
+    __tablename__ = 'lesson'
+
+    lesson_id        = db.Column(db.Integer, primary_key=True)
+    course_id        = db.Column(db.Integer, db.ForeignKey('course.course_id'), nullable=False)
+    title            = db.Column(db.String(200), nullable=False)
+    position         = db.Column(db.Integer, default=1)
+    video_path       = db.Column(db.String(400), nullable=True)
+    duration_seconds = db.Column(db.Integer, nullable=True)
+    created_at       = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Lesson {self.title}>'
 
 class Gig(db.Model):
     __tablename__ = 'gig'
@@ -46,11 +77,29 @@ class Gig(db.Model):
     budget      = db.Column(db.Float,       nullable=False, default=0.0)
     creator_id  = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
 
-    orders  = db.relationship('Order',  backref='gig', lazy=True)
-    reviews = db.relationship('Review', backref='gig', lazy=True)
+    orders       = db.relationship('Order',       backref='gig',       lazy=True)
+    reviews      = db.relationship('Review',      backref='gig',       lazy=True)
+    applications = db.relationship('Application', backref='gig',       lazy=True,
+                                   cascade='all, delete-orphan')
+    category     = db.Column(db.String(80),  nullable=True)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<Gig {self.title}>'
+
+
+class Application(db.Model):
+    __tablename__ = 'application'
+
+    app_id      = db.Column(db.Integer, primary_key=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    gig_id      = db.Column(db.Integer, db.ForeignKey('gig.gig_id'),   nullable=False)
+    cover_letter= db.Column(db.Text,    nullable=True)
+    status      = db.Column(db.String(20), default='pending')
+    applied_at  = db.Column(db.DateTime,  default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Application user={self.user_id} gig={self.gig_id} [{self.status}]>'
 
 class Enrollment(db.Model):
     __tablename__ = 'enrollment'

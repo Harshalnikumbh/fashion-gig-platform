@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Gigs — AtelierX</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ---- Dashboard Shell ---- */
+    .dashboard-body { background: #f5f2ed; overflow-x: hidden; }
+
+    .shell { min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: #1a1a1a;
+      padding: 0;
+      position: fixed; top: 0; left: 0;
+      width: 240px; height: 100vh;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .sidebar-user {
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #C9A96E, #a07840);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 600; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-info span { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.9); }
+    .user-info small { font-size: 11px; color: #C9A96E; }
+
+    .sidebar-section {
+      padding: 20px 16px 8px;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,.25); padding: 0 8px; margin-bottom: 6px;
+      display: block;
+    }
+
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13.5px; color: rgba(255,255,255,.55);
+      text-decoration: none;
+      transition: all .2s;
+      margin-bottom: 2px;
+      position: relative;
+    }
+
+    .sidebar-link:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.05); }
+    .sidebar-link.active {
+      color: #fff; background: rgba(201,169,110,.15);
+    }
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 20px; border-radius: 0 3px 3px 0;
+      background: #C9A96E;
+    }
+
+    .sidebar-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 240px;
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: #fff;
+      padding: 16px 40px;
+      display: flex; align-items: center; gap: 20px;
+      border-bottom: 1px solid rgba(201,169,110,.15);
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 300; color: #1a1a1a;
+      margin-right: auto;
+    }
+    .topbar-title em { font-style: italic; color: #C9A96E; }
+
+    .topbar-search {
+      display: flex; align-items: center; gap: 10px;
+      background: #f5f2ed; border: 1.5px solid rgba(201,169,110,.2);
+      border-radius: 50px; padding: 9px 18px;
+      width: 260px; transition: border-color .2s;
+    }
+    .topbar-search:focus-within { border-color: #C9A96E; }
+    .topbar-search input {
+      border: none; background: none; outline: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; color: #1a1a1a;
+      width: 100%;
+    }
+    .topbar-search input::placeholder { color: #a09080; }
+
+    .topbar-notif {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #f5f2ed; border: 1.5px solid rgba(201,169,110,.2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; transition: border-color .2s;
+    }
+    .topbar-notif:hover { border-color: #C9A96E; }
+    .notif-dot {
+      position: absolute; top: 6px; right: 6px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #C9A96E; border: 1.5px solid #fff;
+    }
+
+    .topbar-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #C9A96E, #a07840);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; color: #fff;
+      cursor: pointer;
+    }
+
+    /* PAGE CONTENT */
+    .page-body { padding: 36px 40px; flex: 1; }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 32px;
+    }
+
+    .filter-label { font-size: 13px; color: #7a7060; font-weight: 500; }
+
+    .filter-chip {
+      padding: 7px 18px; border-radius: 50px;
+      border: 1.5px solid rgba(201,169,110,.3);
+      background: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 13px; color: #2c2c2c;
+      cursor: pointer; transition: all .2s;
+    }
+    .filter-chip:hover { border-color: #C9A96E; color: #a07840; }
+    .filter-chip.active {
+      background: #C9A96E; border-color: #C9A96E;
+      color: #fff; font-weight: 500;
+    }
+
+    .filter-select {
+      padding: 8px 16px; border-radius: 50px;
+      border: 1.5px solid rgba(201,169,110,.25);
+      background: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 13px; color: #2c2c2c; outline: none;
+      cursor: pointer; transition: border-color .2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A96E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .filter-select:focus { border-color: #C9A96E; }
+
+    .filter-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .result-count { font-size: 13px; color: #7a7060; }
+
+    .view-toggle { display: flex; gap: 4px; }
+    .view-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1.5px solid rgba(201,169,110,.25);
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; transition: all .2s;
+    }
+    .view-btn.active { background: #C9A96E; border-color: #C9A96E; color: #fff; }
+
+    /* GIGS GRID */
+    .gigs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .gig-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid rgba(201,169,110,.15);
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+      box-shadow: 0 4px 16px rgba(0,0,0,.05);
+      display: flex; flex-direction: column;
+    }
+    .gig-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px rgba(0,0,0,.1);
+    }
+
+    .gig-thumb {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gt-bridal { background: linear-gradient(135deg, #f5ede0, #d4b48c); }
+    .gt-couture { background: linear-gradient(135deg, #e8d5f5, #a07acd); }
+    .gt-streetwear { background: linear-gradient(135deg, #d5eaf5, #5a9fc2); }
+    .gt-pattern { background: linear-gradient(135deg, #faf0e0, #c9a050); }
+    .gt-illustration { background: linear-gradient(135deg, #f0e8f5, #9a6ab5); }
+    .gt-sustainable { background: linear-gradient(135deg, #e0f5e8, #5a9a6a); }
+    .gt-accessories { background: linear-gradient(135deg, #fce8d5, #c97a50); }
+    .gt-styling { background: linear-gradient(135deg, #e5e0f5, #7a6ab5); }
+
+    .gig-thumb-icon {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 44px; opacity: .55;
+    }
+
+    .gig-badge {
+      position: absolute; top: 12px; left: 12px;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(8px);
+      padding: 4px 12px; border-radius: 50px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #a07840; font-weight: 600;
+    }
+
+    .gig-badge.new {
+      background: rgba(201,169,110,.9); color: #fff;
+    }
+
+    .gig-save {
+      position: absolute; top: 10px; right: 10px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; border: none;
+      transition: transform .2s;
+    }
+    .gig-save:hover { transform: scale(1.15); }
+    .gig-save.saved { color: #e07070; }
+
+    .gig-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+
+    .gig-category {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #C9A96E; font-weight: 600; margin-bottom: 6px;
+    }
+
+    .gig-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-weight: 400; color: #1a1a1a;
+      line-height: 1.3; margin-bottom: 8px;
+    }
+
+    .gig-desc {
+      font-size: 12.5px; color: #7a7060; line-height: 1.6;
+      margin-bottom: 14px; flex: 1;
+    }
+
+    .gig-skills {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+
+    .skill-tag {
+      padding: 3px 10px; border-radius: 50px;
+      background: #faf7f2; border: 1px solid rgba(201,169,110,.25);
+      font-size: 11px; color: #7a7060;
+    }
+
+    .gig-footer {
+      border-top: 1px solid rgba(201,169,110,.12);
+      padding-top: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .gig-budget {
+      display: flex; flex-direction: column;
+    }
+    .gig-budget-amount {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+    }
+    .gig-budget-label { font-size: 10px; color: #7a7060; }
+
+    .gig-meta {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .gig-meta-item {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; color: #7a7060;
+    }
+
+    .btn-apply {
+      padding: 9px 20px; border-radius: 50px;
+      background: #1a1a1a; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      border: none; cursor: pointer;
+      transition: all .22s;
+    }
+    .btn-apply:hover { background: #C9A96E; transform: translateY(-1px); }
+    .btn-apply.applied {
+      background: rgba(201,169,110,.15); color: #a07840;
+      border: 1.5px solid rgba(201,169,110,.3);
+    }
+
+    /* FEATURED BANNER */
+    .featured-banner {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 28px 36px;
+      display: flex; align-items: center; gap: 32px;
+      margin-bottom: 32px;
+      position: relative; overflow: hidden;
+    }
+
+    .featured-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(201,169,110,.15) 0%, transparent 60%);
+    }
+
+    .featured-banner-content { position: relative; z-index: 1; flex: 1; }
+    .featured-tag {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: #C9A96E; font-weight: 600; margin-bottom: 8px; display: block;
+    }
+    .featured-banner h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 300; color: #fff; margin-bottom: 6px;
+    }
+    .featured-banner h3 em { color: #C9A96E; font-style: italic; }
+    .featured-banner p { font-size: 13px; color: rgba(255,255,255,.5); }
+    .featured-stats {
+      display: flex; gap: 32px; position: relative; z-index: 1;
+    }
+    .featured-stat span { display: block; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #C9A96E; }
+    .featured-stat small { font-size: 11px; color: rgba(255,255,255,.4); }
+
+    .btn-featured {
+      padding: 11px 24px; border-radius: 50px;
+      background: #C9A96E; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      border: none; cursor: pointer; transition: all .2s;
+      position: relative; z-index: 1; white-space: nowrap;
+    }
+    .btn-featured:hover { background: #a07840; }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 40px;
+    }
+
+    .page-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 1.5px solid rgba(201,169,110,.25);
+      background: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 13px; color: #2c2c2c; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .page-btn:hover { border-color: #C9A96E; color: #a07840; }
+    .page-btn.active { background: #C9A96E; border-color: #C9A96E; color: #fff; }
+    .page-btn.arrow { font-size: 16px; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: 80px 20px;
+      grid-column: 1/-1;
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #1a1a1a; margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; color: #7a7060; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+      .gigs-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .topbar, .page-body { padding-left: 20px; padding-right: 20px; }
+      .gigs-grid { grid-template-columns: 1fr; }
+      .featured-stats { display: none; }
+    }
+  </style>
+</head>
+<body class="dashboard-body">
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">S</div>
+      <div class="user-info">
+        <span>Sanjivani Sharma</span>
+        <small>🌸 Learner</small>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Main</span>
+      <a href="/dashboard" class="sidebar-link">
+        <span class="sidebar-icon">🏠</span> Dashboard
+      </a>
+      <a href="/my-courses" class="sidebar-link">
+        <span class="sidebar-icon">🎓</span> My Courses
+      </a>
+      <a href="/video-library" class="sidebar-link">
+        <span class="sidebar-icon">🎬</span> Video Library
+      </a>
+      <a href="/portfolio" class="sidebar-link">
+        <span class="sidebar-icon">📁</span> My Portfolio
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Opportunities</span>
+      <a href="/browse-gigs" class="sidebar-link active">
+        <span class="sidebar-icon">🪡</span> Browse Gigs
+      </a>
+      <a href="/my-applications" class="sidebar-link">
+        <span class="sidebar-icon">📋</span> My Applications
+      </a>
+      <a href="/saved" class="sidebar-link">
+        <span class="sidebar-icon">⭐</span> Saved
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h1 class="topbar-title">Browse <em>Gigs</em></h1>
+      <div class="topbar-search">
+        <span>🔍</span>
+        <input type="text" placeholder="Search gigs, skills, designers..." id="gigSearch" oninput="filterGigs()"/>
+      </div>
+      <div class="topbar-notif">
+        🔔
+        <span class="notif-dot"></span>
+      </div>
+      <div class="topbar-avatar">S</div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- FEATURED BANNER -->
+      <div class="featured-banner">
+        <div class="featured-banner-content">
+          <span class="featured-tag">✦ Spotlight Opportunity</span>
+          <h3>Bridal Season is <em>Here</em></h3>
+          <p>50+ new bridal collection & wedding design gigs posted this week</p>
+        </div>
+        <div class="featured-stats">
+          <div class="featured-stat"><span>58</span><small>Bridal Gigs</small></div>
+          <div class="featured-stat"><span>₹40K+</span><small>Top Budget</small></div>
+          <div class="featured-stat"><span>3 Days</span><small>Avg. Deadline</small></div>
+        </div>
+        <button class="btn-featured">Explore Bridal Gigs →</button>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-chip active" onclick="setFilter(this, 'all')">All Gigs</button>
+        <button class="filter-chip" onclick="setFilter(this, 'Bridal & Wedding')">Bridal</button>
+        <button class="filter-chip" onclick="setFilter(this, 'Haute Couture')">Couture</button>
+        <button class="filter-chip" onclick="setFilter(this, 'Pattern Making')">Patterns</button>
+        <button class="filter-chip" onclick="setFilter(this, 'Illustration')">Illustration</button>
+        <button class="filter-chip" onclick="setFilter(this, 'Sustainable Fashion')">Sustainable</button>
+
+        <div class="filter-right">
+          <select class="filter-select" onchange="sortGigs(this.value)">
+            <option value="newest">Newest First</option>
+            <option value="budget-high">Budget: High to Low</option>
+            <option value="budget-low">Budget: Low to High</option>
+            <option value="deadline">Deadline: Soon</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-btn active" title="Grid view">⊞</button>
+            <button class="view-btn" title="List view">≡</button>
+          </div>
+          <span class="result-count" id="resultCount">24 gigs found</span>
+        </div>
+      </div>
+
+      <!-- GIGS GRID -->
+      <div class="gigs-grid" id="gigsGrid">
+
+        <!-- GIG CARDS -->
+        <div class="gig-card" data-category="Bridal & Wedding" data-budget="35000">
+          <div class="gig-thumb gt-bridal">
+            <span class="gig-thumb-icon">👗</span>
+            <span class="gig-badge new">New</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Bridal & Wedding</span>
+            <h3 class="gig-title">Bridal Lehenga Collection Designer</h3>
+            <p class="gig-desc">Looking for a talented designer to create a 12-piece bridal lehenga collection for the upcoming wedding season. Must have experience with embroidery and hand-work.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Embroidery</span>
+              <span class="skill-tag">Draping</span>
+              <span class="skill-tag">Bridal</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹25,000 – ₹40,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Haute Couture" data-budget="60000">
+          <div class="gig-thumb gt-couture">
+            <span class="gig-thumb-icon">✨</span>
+            <span class="gig-badge">Couture</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Haute Couture</span>
+            <h3 class="gig-title">Evening Gown Collection — Paris Showcase</h3>
+            <p class="gig-desc">Prestigious fashion house seeks a skilled designer to contribute 5 original evening gowns for an international showcase. Portfolio required.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Haute Couture</span>
+              <span class="skill-tag">Beadwork</span>
+              <span class="skill-tag">Toile</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹50,000 – ₹75,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Pattern Making" data-budget="15000">
+          <div class="gig-thumb gt-pattern">
+            <span class="gig-thumb-icon">📐</span>
+            <span class="gig-badge new">New</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Pattern Making</span>
+            <h3 class="gig-title">Kurtis Pattern Set — Ready to Wear</h3>
+            <p class="gig-desc">Small fashion label needs 15 kurti patterns across XS–3XL sizing. Experience in grading patterns essential. Delivery in 2 weeks.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Grading</span>
+              <span class="skill-tag">CAD</span>
+              <span class="skill-tag">RTW</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹10,000 – ₹18,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Illustration" data-budget="8000">
+          <div class="gig-thumb gt-illustration">
+            <span class="gig-thumb-icon">🖋️</span>
+            <span class="gig-badge">Remote</span>
+            <button class="gig-save" onclick="toggleSave(this)" style="color:#e07070">❤️</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Illustration</span>
+            <h3 class="gig-title">Fashion Flat Sketches — Lookbook</h3>
+            <p class="gig-desc">We need 20 high-quality fashion flat sketches for a brand lookbook. Digital delivery in PSD/AI format. Quick turnaround preferred.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Flat Sketches</span>
+              <span class="skill-tag">Illustrator</span>
+              <span class="skill-tag">Digital</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹6,000 – ₹10,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply applied">Applied ✓</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Sustainable Fashion" data-budget="22000">
+          <div class="gig-thumb gt-sustainable">
+            <span class="gig-thumb-icon">🌿</span>
+            <span class="gig-badge">Eco</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Sustainable Fashion</span>
+            <h3 class="gig-title">Upcycled Capsule Collection Designer</h3>
+            <p class="gig-desc">Eco-conscious brand building a 10-piece upcycled capsule collection. Must have knowledge of sustainable fabrics and zero-waste pattern cutting.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Zero Waste</span>
+              <span class="skill-tag">Upcycling</span>
+              <span class="skill-tag">Deadstock</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹18,000 – ₹28,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Bridal & Wedding" data-budget="55000">
+          <div class="gig-thumb gt-bridal">
+            <span class="gig-thumb-icon">💍</span>
+            <span class="gig-badge new">Urgent</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Bridal & Wedding</span>
+            <h3 class="gig-title">Custom Sherwani & Saree — Celebrity Wedding</h3>
+            <p class="gig-desc">Renowned stylist seeking top-tier designer for celebrity wedding commission. Sherwani + coordinating saree. Budget is flexible for exceptional talent.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Menswear</span>
+              <span class="skill-tag">Saree</span>
+              <span class="skill-tag">Luxury</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹45,000 – ₹70,000</span>
+                <span class="gig-budget-label">Negotiable</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Streetwear" data-budget="12000">
+          <div class="gig-thumb gt-streetwear">
+            <span class="gig-thumb-icon">👟</span>
+            <span class="gig-badge">Remote</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Streetwear & Urban</span>
+            <h3 class="gig-title">Streetwear Drop — 6-Piece Collection</h3>
+            <p class="gig-desc">Hypebeast brand planning a limited drop. Need someone to design 6 graphic tees + 2 oversized hoodies with original art direction and tech packs.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Tech Packs</span>
+              <span class="skill-tag">Graphics</span>
+              <span class="skill-tag">Urban</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹8,000 – ₹15,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Accessories" data-budget="9000">
+          <div class="gig-thumb gt-accessories">
+            <span class="gig-thumb-icon">👜</span>
+            <span class="gig-badge">New</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Accessories Design</span>
+            <h3 class="gig-title">Handcrafted Leather Bag Collection</h3>
+            <p class="gig-desc">Artisan brand seeks a designer to create 8 original bag silhouettes — totes, clutches, and crossbodies. Pattern files + 3D renders required.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Leather</span>
+              <span class="skill-tag">3D Renders</span>
+              <span class="skill-tag">Accessories</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹7,000 – ₹12,000</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gig-card" data-category="Illustration" data-budget="5000">
+          <div class="gig-thumb gt-styling">
+            <span class="gig-thumb-icon">✏️</span>
+            <span class="gig-badge">Remote</span>
+            <button class="gig-save" onclick="toggleSave(this)">🤍</button>
+          </div>
+          <div class="gig-body">
+            <span class="gig-category">Fashion Styling</span>
+            <h3 class="gig-title">Editorial Mood Board — Digital Campaign</h3>
+            <p class="gig-desc">Fashion e-commerce brand needs a talented stylist/illustrator to create 10 editorial mood boards for a new digital campaign launch next month.</p>
+            <div class="gig-skills">
+              <span class="skill-tag">Mood Boards</span>
+              <span class="skill-tag">Editorial</span>
+              <span class="skill-tag">Digital</span>
+            </div>
+            <div class="gig-footer">
+              <div class="gig-budget">
+                <span class="gig-budget-amount">₹3,500 – ₹6,500</span>
+                <span class="gig-budget-label">Fixed Price</span>
+              </div>
+              <button class="btn-apply" onclick="applyGig(this)">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination">
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="color:#7a7060; font-size:13px;">...</span>
+        <button class="page-btn">8</button>
+        <button class="page-btn arrow">›</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeFilter = 'all';
+
+  function setFilter(btn, category) {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = category;
+    filterGigs();
+  }
+
+  function filterGigs() {
+    const search = document.getElementById('gigSearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.gig-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      const cat = card.dataset.category || '';
+      const title = card.querySelector('.gig-title').textContent.toLowerCase();
+      const desc = card.querySelector('.gig-desc').textContent.toLowerCase();
+
+      const matchFilter = activeFilter === 'all' || cat === activeFilter;
+      const matchSearch = !search || title.includes(search) || desc.includes(search);
+
+      if (matchFilter && matchSearch) {
+        card.style.display = '';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    document.getElementById('resultCount').textContent = visible + ' gig' + (visible !== 1 ? 's' : '') + ' found';
+  }
+
+  function sortGigs(value) {
+    const grid = document.getElementById('gigsGrid');
+    const cards = [...grid.querySelectorAll('.gig-card')];
+
+    cards.sort((a, b) => {
+      const budgetA = parseInt(a.dataset.budget);
+      const budgetB = parseInt(b.dataset.budget);
+      if (value === 'budget-high') return budgetB - budgetA;
+      if (value === 'budget-low') return budgetA - budgetB;
+      return 0;
+    });
+
+    cards.forEach(c => grid.appendChild(c));
+  }
+
+  function toggleSave(btn) {
+    if (btn.textContent === '🤍') {
+      btn.textContent = '❤️';
+      btn.style.color = '#e07070';
+    } else {
+      btn.textContent = '🤍';
+      btn.style.color = '';
+    }
+  }
+
+  function applyGig(btn) {
+    btn.textContent = 'Applied ✓';
+    btn.classList.add('applied');
+    btn.disabled = true;
+
+    // Animate
+    btn.style.transform = 'scale(0.95)';
+    setTimeout(() => btn.style.transform = '', 200);
+  }
+
+  // Scroll reveal
+  window.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.gig-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, 60 * (Array.from(cards).indexOf(entry.target) % 3));
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    cards.forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity .5s ease, transform .5s ease';
+      observer.observe(card);
+    });
+  });
+</script>
+
+</body>
+</html>

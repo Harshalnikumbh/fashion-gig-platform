@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator Dashboard - AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #C9A96E;
+      --gold-dark: #a07840;
+      --dark: #1a1a1a;
+      --cream: #faf7f2;
+      --white: #ffffff;
+      --muted: #7a7060;
+      --sidebar-w: 240px;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w);
+      background: var(--dark); padding: 28px 0; overflow-y: auto;
+    }
+    .sidebar-logo, .sidebar-user, .nav-group-label, .nav-item { padding-left: 24px; padding-right: 24px; }
+    .sidebar-logo { padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .sidebar-user { display: flex; gap: 12px; align-items: center; padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #e8d5b7, #C9A96E);
+      display: flex; align-items: center; justify-content: center; font-weight: 600;
+    }
+    .sidebar-user span { color: #fff; display: block; font-size: 13px; font-weight: 500; }
+    .sidebar-user small { color: var(--gold); font-size: 11px; }
+    .nav-group-label { color: rgba(255,255,255,.28); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding-top: 16px; padding-bottom: 8px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,.6);
+      text-decoration: none; padding-top: 10px; padding-bottom: 10px; border-left: 3px solid transparent;
+    }
+    .nav-item.active, .nav-item:hover { color: var(--gold); background: rgba(201,169,110,.1); border-left-color: var(--gold); }
+    .main { margin-left: var(--sidebar-w); min-height: 100vh; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 22px 36px; background: rgba(250,247,242,.95); border-bottom: 1px solid rgba(201,169,110,.18);
+      position: sticky; top: 0;
+    }
+    .topbar h1 { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; }
+    .topbar h1 em { color: var(--gold); font-style: italic; }
+    .actions { display: flex; gap: 12px; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+      padding: 12px 20px; border-radius: 999px; font-size: 14px;
+    }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-gold { background: var(--gold); color: #fff; }
+    .profile-menu-wrap { position: relative; }
+    .profile-trigger { border: none; background: none; cursor: pointer; padding: 0; }
+    .profile-dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0; width: 220px;
+      background: var(--white); border: 1px solid rgba(201,169,110,.18); border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.12); padding: 10px; display: none; z-index: 120;
+    }
+    .profile-dropdown.open { display: block; }
+    .profile-dropdown-head { padding: 10px 12px 12px; border-bottom: 1px solid rgba(201,169,110,.14); margin-bottom: 8px; }
+    .profile-dropdown-head strong { display: block; font-size: 13px; }
+    .profile-dropdown-head small { color: var(--muted); font-size: 11px; }
+    .profile-dropdown a, .profile-dropdown button {
+      width: 100%; text-align: left; background: none; border: none; text-decoration: none;
+      color: var(--dark); padding: 10px 12px; border-radius: 10px; font-size: 13px; cursor: pointer;
+      display: block; font-family: inherit;
+    }
+    .profile-dropdown a:hover, .profile-dropdown button:hover { background: #f7f2ea; color: var(--gold-dark); }
+    .topbar-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, #e8d5b7, #C9A96E);
+      display: flex; align-items: center; justify-content: center; font-weight: 600;
+    }
+    .profile-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.38); display: none;
+      align-items: center; justify-content: center; z-index: 200;
+    }
+    .profile-modal.open { display: flex; }
+    .profile-card {
+      width: min(100%, 520px); background: var(--white); border-radius: 18px;
+      padding: 26px 26px 22px; box-shadow: 0 22px 60px rgba(0,0,0,.18);
+    }
+    .profile-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; margin-bottom: 6px; }
+    .profile-card p { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+    .profile-form { display: grid; gap: 14px; }
+    .profile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .profile-field label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 6px; }
+    .profile-field input {
+      width: 100%; padding: 12px 14px; border: 1.5px solid rgba(0,0,0,.1);
+      border-radius: 10px; font: inherit; outline: none;
+    }
+    .profile-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,.14); }
+    .profile-actions {
+      display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;
+    }
+    .profile-actions button { border-radius: 999px; padding: 11px 18px; font: inherit; cursor: pointer; }
+    .btn-cancel-profile { background: none; border: 1.5px solid rgba(0,0,0,.12); }
+    .btn-save-profile { background: var(--dark); color: var(--white); border: none; }
+    .page { padding: 32px 36px 44px; }
+    .hero {
+      background: linear-gradient(135deg, #1a1a1a, #2b251d); color: #fff;
+      border-radius: 20px; padding: 28px 30px; margin-bottom: 28px;
+      display: flex; justify-content: space-between; gap: 24px; align-items: center;
+    }
+    .hero h2 { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; margin-bottom: 8px; }
+    .hero h2 em { color: var(--gold); font-style: italic; }
+    .hero p { color: rgba(255,255,255,.68); max-width: 560px; line-height: 1.7; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card, .panel {
+      background: var(--white); border: 1px solid rgba(201,169,110,.14);
+      border-radius: var(--radius); box-shadow: 0 6px 24px rgba(0,0,0,.04);
+    }
+    .stat-card { padding: 22px 24px; }
+    .stat-card strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; }
+    .stat-card span { color: var(--muted); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .panel { padding: 22px 24px; }
+    .panel h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; margin-bottom: 18px; }
+    .panel h3 em { color: var(--gold); font-style: italic; }
+    .empty { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .list { display: flex; flex-direction: column; gap: 12px; }
+    .item {
+      display: flex; justify-content: space-between; gap: 16px; align-items: center;
+      background: #fcfaf7; border: 1px solid rgba(201,169,110,.12); border-radius: 12px; padding: 14px 16px;
+    }
+    .item strong { display: block; font-size: 14px; margin-bottom: 4px; }
+    .item small { color: var(--muted); font-size: 12px; }
+    .pill {
+      padding: 6px 12px; border-radius: 999px; background: rgba(201,169,110,.12);
+      color: var(--gold-dark); font-size: 12px; white-space: nowrap;
+    }
+    @media (max-width: 960px) {
+      .main { margin-left: 0; }
+      .sidebar { display: none; }
+      .stats, .grid { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: flex-start; }
+      .topbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar">{{ user.first_name[:1] }}</div>
+      <div>
+        <span>{{ user.first_name }} {{ user.last_name }}</span>
+        <small>{{ user.speciality or 'Creator' }}</small>
+      </div>
+    </div>
+    <div class="nav-group-label">Creator</div>
+    <a href="/creator-dashboard" class="nav-item active">Dashboard</a>
+    <a href="/upload-course" class="nav-item">Upload Course</a>
+    <a href="/post-a-gig" class="nav-item">Post a Gig</a>
+    <a href="/logout" class="nav-item">Sign Out</a>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>Creator <em>Dashboard</em></h1>
+      <div class="topbar-right">
+        <div class="actions">
+          <a href="/upload-course" class="btn btn-dark">Upload Course</a>
+          <a href="/post-a-gig" class="btn btn-gold">Post a Gig</a>
+        </div>
+        <div class="profile-menu-wrap">
+          <button class="profile-trigger" id="creatorProfileMenuBtn" type="button" aria-label="Open profile menu">
+            <div class="topbar-avatar">{{ user.first_name[:1] }}</div>
+          </button>
+          <div class="profile-dropdown" id="creatorProfileDropdown">
+            <div class="profile-dropdown-head">
+              <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+              <small>{{ user.email }}</small>
+            </div>
+            <button type="button" id="openCreatorProfileModal">Edit Profile</button>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-modal" id="creatorProfileModal">
+      <div class="profile-card">
+        <h3>Edit Profile</h3>
+        <p>Update your creator details.</p>
+        <form class="profile-form" method="POST" action="/profile">
+          <input type="hidden" name="next" value="/creator-dashboard"/>
+          <div class="profile-row">
+            <div class="profile-field">
+              <label>First Name</label>
+              <input type="text" name="first_name" value="{{ user.first_name }}" required/>
+            </div>
+            <div class="profile-field">
+              <label>Last Name</label>
+              <input type="text" name="last_name" value="{{ user.last_name }}" required/>
+            </div>
+          </div>
+          <div class="profile-field">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ user.email }}" required/>
+          </div>
+          <div class="profile-field">
+            <label>Speciality</label>
+            <input type="text" name="speciality" value="{{ user.speciality or '' }}"/>
+          </div>
+          <div class="profile-actions">
+            <button class="btn-cancel-profile" type="button" id="closeCreatorProfileModal">Cancel</button>
+            <button class="btn-save-profile" type="submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="page">
+      <section class="hero">
+        <div>
+          <h2>Welcome back, <em>{{ user.first_name }}</em></h2>
+          <p>Manage your creator account from one place. Publish courses, post gigs, and track the content you already have live in the platform.</p>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat-card">
+          <strong>{{ stats.courses }}</strong>
+          <span>Courses Published</span>
+        </div>
+        <div class="stat-card">
+          <strong>{{ stats.gigs }}</strong>
+          <span>Gigs Posted</span>
+        </div>
+        <div class="stat-card">
+          <strong>{{ stats.orders }}</strong>
+          <span>Linked Orders</span>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <h3>Your <em>Courses</em></h3>
+          {% if courses %}
+          <div class="list">
+            {% for course in courses %}
+            <div class="item">
+              <div>
+                <strong>{{ course.title }}</strong>
+                <small>{{ course.description[:90] }}{% if course.description|length > 90 %}...{% endif %}</small>
+              </div>
+              <div class="pill">Rs. {{ '%.0f'|format(course.price) }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty">No courses yet. Use Upload Course to create your first learning product.</p>
+          {% endif %}
+        </div>
+
+        <div class="panel">
+          <h3>Your <em>Gigs</em></h3>
+          {% if gigs %}
+          <div class="list">
+            {% for gig in gigs %}
+            <div class="item">
+              <div>
+                <strong>{{ gig.title }}</strong>
+                <small>{{ gig.description[:90] }}{% if gig.description|length > 90 %}...{% endif %}</small>
+              </div>
+              <div class="pill">Rs. {{ '%.0f'|format(gig.budget) }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty">No gigs posted yet. Use Post a Gig to start receiving applications from learners.</p>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    (function () {
+      const menuBtn = document.getElementById('creatorProfileMenuBtn');
+      const dropdown = document.getElementById('creatorProfileDropdown');
+      const modal = document.getElementById('creatorProfileModal');
+      const openModalBtn = document.getElementById('openCreatorProfileModal');
+      const closeModalBtn = document.getElementById('closeCreatorProfileModal');
+
+      if (menuBtn && dropdown) {
+        menuBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          dropdown.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+            dropdown.classList.remove('open');
+          }
+        });
+      }
+
+      if (openModalBtn && modal) {
+        openModalBtn.addEventListener('click', function () {
+          dropdown.classList.remove('open');
+          modal.classList.add('open');
+        });
+      }
+
+      if (closeModalBtn && modal) {
+        closeModalBtn.addEventListener('click', function () {
+          modal.classList.remove('open');
+        });
+
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            modal.classList.remove('open');
+          }
+        });
+      }
+    }());
+  </script>
+</body>
+</html>

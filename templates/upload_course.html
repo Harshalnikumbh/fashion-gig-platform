@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Course — AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold:#C9A96E;--gold-light:#e8d5b7;--gold-dark:#a07840;
+      --dark:#1a1a1a;--cream:#faf7f2;--cream2:#f5ede0;
+      --white:#ffffff;--text:#2c2c2c;--muted:#7a7060;
+      --sidebar-w:240px;--radius:12px;--radius-sm:6px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);display:flex;min-height:100vh;}
+    .sidebar{width:var(--sidebar-w);background:var(--dark);height:100vh;position:fixed;top:0;left:0;display:flex;flex-direction:column;padding:28px 0;z-index:100;overflow-y:auto;}
+    .sidebar-logo{padding:0 24px 28px;border-bottom:1px solid rgba(255,255,255,.07);}
+    .sidebar-logo svg{height:32px;}
+    .sidebar-user{padding:20px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:10px;}
+    .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--dark);flex-shrink:0;}
+    .sidebar-user-info span{font-size:13px;font-weight:500;color:#fff;display:block;}
+    .sidebar-user-info small{font-size:11px;color:var(--gold);}
+    .nav-group-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);padding:14px 24px 6px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 24px;font-size:14px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;text-decoration:none;border-left:2px solid transparent;}
+    .nav-item:hover{background:rgba(201,169,110,.08);color:var(--gold-light);}
+    .nav-item.active{background:rgba(201,169,110,.12);color:var(--gold);border-left-color:var(--gold);}
+    .nav-item .icon{font-size:16px;width:22px;text-align:center;}
+    .main{margin-left:var(--sidebar-w);flex:1;}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(250,247,242,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,169,110,.18);padding:14px 40px;display:flex;align-items:center;gap:16px;}
+    .back-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:color .2s;}
+    .back-btn:hover{color:var(--gold-dark);}
+    .topbar-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;}
+    .topbar-title em{color:var(--gold);}
+    .page{padding:36px 40px;display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;}
+
+    /* FORM */
+    .form-card{background:var(--white);border-radius:var(--radius);border:1px solid rgba(201,169,110,.15);padding:28px;margin-bottom:22px;box-shadow:0 4px 20px rgba(0,0,0,.04);}
+    .card-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(201,169,110,.12);}
+    .card-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .card-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;}
+    .card-header h3 em{color:var(--gold);}
+    .card-header p{font-size:12px;color:var(--muted);margin-top:2px;}
+    .form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+    .form-group:last-child{margin-bottom:0;}
+    .form-group label{font-size:13px;font-weight:500;color:var(--dark);}
+    .form-group label span{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px;}
+    .form-group input,.form-group select,.form-group textarea{padding:12px 16px;border:1.5px solid rgba(0,0,0,.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--white);color:var(--text);transition:border-color .2s,box-shadow .2s;outline:none;resize:vertical;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,.15);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+    /* LESSON BUILDER */
+    .lesson-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+    .lesson-row{background:var(--cream);border:1px solid rgba(201,169,110,.2);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:grab;transition:box-shadow .2s;}
+    .lesson-row:active{cursor:grabbing;box-shadow:0 8px 24px rgba(0,0,0,.1);}
+    .drag-handle{color:var(--muted);font-size:16px;cursor:grab;}
+    .lesson-num{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .lesson-details{flex:1;}
+    .lesson-details input{border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;}
+    .lesson-details small{font-size:11px;color:var(--muted);}
+    .lesson-actions{display:flex;gap:6px;}
+    .lesson-action-btn{background:none;border:none;cursor:pointer;font-size:15px;color:var(--muted);transition:color .2s;padding:4px;}
+    .lesson-action-btn:hover{color:var(--gold-dark);}
+    .add-lesson-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gold-dark);cursor:pointer;background:var(--cream2);border:1.5px dashed rgba(201,169,110,.4);border-radius:var(--radius-sm);padding:12px 16px;width:100%;transition:all .2s;font-family:'DM Sans',sans-serif;}
+    .add-lesson-btn:hover{border-color:var(--gold);background:rgba(201,169,110,.06);}
+
+    /* UPLOAD ZONE */
+    .upload-zone{border:2px dashed rgba(201,169,110,.35);border-radius:var(--radius);padding:36px 20px;text-align:center;cursor:pointer;transition:all .25s;background:var(--cream);position:relative;}
+    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--gold);background:rgba(201,169,110,.05);}
+    .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+    .uz-icon{font-size:40px;margin-bottom:10px;}
+    .upload-zone h4{font-size:14px;font-weight:500;margin-bottom:5px;}
+    .upload-zone p{font-size:12px;color:var(--muted);margin-bottom:12px;}
+    .uz-formats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+    .uz-format{background:var(--white);border:1px solid rgba(201,169,110,.2);color:var(--muted);font-size:11px;padding:3px 10px;border-radius:50px;}
+
+    /* VIDEO LIST */
+    .video-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+    .video-item{background:var(--cream2);border:1px solid rgba(201,169,110,.2);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;}
+    .vthumb{width:44px;height:34px;border-radius:6px;background:var(--dark);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:14px;flex-shrink:0;}
+    .vinfo{flex:1;}
+    .vinfo span{font-size:13px;font-weight:500;display:block;}
+    .vinfo small{font-size:11px;color:var(--muted);}
+    .vprog{height:3px;background:rgba(201,169,110,.2);border-radius:2px;margin-top:5px;overflow:hidden;}
+    .vprog-bar{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
+    .rm-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;}
+    .rm-btn:hover{color:#c45a7e;}
+
+    /* PRICING */
+    .price-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .price-card{border:1.5px solid rgba(201,169,110,.2);border-radius:var(--radius-sm);padding:16px;cursor:pointer;transition:all .2s;text-align:center;}
+    .price-card.sel{border-color:var(--gold);background:rgba(201,169,110,.07);}
+    .price-card .pc-icon{font-size:22px;margin-bottom:6px;}
+    .price-card .pc-title{font-size:13px;font-weight:500;margin-bottom:2px;}
+    .price-card .pc-desc{font-size:11px;color:var(--muted);}
+
+    /* SIDEBAR PREVIEW */
+    .preview-card{background:var(--white);border-radius:var(--radius);border:1px solid rgba(201,169,110,.15);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);position:sticky;top:80px;}
+    .preview-thumb{height:180px;background:linear-gradient(135deg,#f0e6d4,#c9a06a);position:relative;display:flex;align-items:center;justify-content:center;}
+    .preview-thumb-text{font-size:36px;opacity:.4;}
+    .preview-play{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+    .preview-body{padding:18px;}
+    .preview-tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dark);font-weight:500;margin-bottom:8px;}
+    .preview-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;margin-bottom:8px;line-height:1.3;}
+    .preview-title em{color:var(--gold);}
+    .preview-meta{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;margin-bottom:16px;}
+    .preview-price{font-size:22px;font-weight:600;color:var(--dark);font-family:'Cormorant Garamond',serif;margin-bottom:14px;}
+    .preview-price span{font-size:13px;font-weight:400;color:var(--muted);}
+    .btn-preview{width:100%;padding:12px;border-radius:50px;background:var(--gold);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;}
+    .btn-preview:hover{background:var(--gold-dark);}
+
+    /* ACTIONS */
+    .form-actions{display:flex;gap:12px;margin-top:4px;}
+    .btn-secondary{padding:12px 24px;border-radius:50px;border:1.5px solid rgba(0,0,0,.15);background:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:all .2s;}
+    .btn-secondary:hover{border-color:var(--gold);color:var(--gold-dark);}
+    .btn-primary{flex:1;padding:13px 32px;border-radius:50px;background:var(--dark);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .25s;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+    .btn-primary:hover{background:var(--gold);transform:translateY(-1px);}
+
+    .help-tip{background:rgba(201,169,110,.07);border:1px solid rgba(201,169,110,.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--gold-dark);display:flex;gap:8px;align-items:flex-start;}
+    .form-message{margin:0 0 18px;padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;}
+    .form-message.error{background:rgba(196,90,126,.08);border:1px solid rgba(196,90,126,.2);color:#9b4063;}
+
+    @media(max-width:1000px){
+      .page{grid-template-columns:1fr;}
+      .preview-card{display:none;}
+    }
+    @media(max-width:900px){
+      .sidebar{width:60px;}
+      .sidebar-logo,.sidebar-user-info,.nav-group-label{display:none;}
+      .nav-item{padding:12px 18px;}
+      .nav-item .label{display:none;}
+      .main{margin-left:60px;}
+      .page{padding:24px 20px;}
+      .topbar{padding:12px 20px;}
+      .two-col{grid-template-columns:1fr;}
+      .price-cards{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar">{{ user.first_name[:1] }}</div>
+      <div class="sidebar-user-info"><span>{{ user.first_name }} {{ user.last_name }}</span><small>{{ user.speciality or 'Creator' }}</small></div>
+    </div>
+    <span class="nav-group-label">Creator</span>
+    <a href="/creator-dashboard" class="nav-item"><span class="icon">🏠</span><span class="label">Dashboard</span></a>
+    <a href="/post-a-gig" class="nav-item"><span class="icon">➕</span><span class="label">Post a Gig</span></a>
+    <a href="/upload-course" class="nav-item active"><span class="icon">⬆️</span><span class="label">Upload Course</span></a>
+    <a href="/logout" class="nav-item"><span class="icon">🚪</span><span class="label">Sign Out</span></a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <a href="/creator-dashboard" class="back-btn">← Back</a>
+      <div style="width:1px;height:20px;background:rgba(201,169,110,.3);"></div>
+      <div class="topbar-title">Upload a <em>Course</em></div>
+    </div>
+
+    <form class="page" method="POST" action="{{ url_for('upload_course') }}">
+      <div class="form-col">
+        {% if error_message %}
+        <div class="form-message error">{{ error_message }}</div>
+        {% endif %}
+
+        <!-- Course Info -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,var(--gold-light),var(--gold));">📚</div>
+            <div><h3>Course <em>Information</em></h3><p>Basic details about your course</p></div>
+          </div>
+          <div class="form-group">
+            <label>Course Title <span>*</span></label>
+            <input type="text" id="courseTitle" name="course_title" placeholder="e.g. Fundamentals of Fabric Draping" oninput="updatePreview()"/>
+          </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>Category <span>*</span></label>
+              <select name="category" onchange="updatePreview()">
+                <option>Draping</option><option>Pattern Making</option><option>Fashion Illustration</option>
+                <option>Bridal Design</option><option>Streetwear</option><option>Sustainable Fashion</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Skill Level</label>
+              <select>
+                <option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>All Levels</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Short Description <span>*</span></label>
+            <textarea name="description" placeholder="A compelling 1–2 sentence overview shown in course listings..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label>What Students Will Learn</label>
+            <textarea placeholder="• Master basic draping on a dress form&#10;• Understand fabric grain and bias&#10;• Create 3 complete draping projects" rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Prerequisites <span>(optional)</span></label>
+            <input type="text" placeholder="e.g. Basic sewing knowledge, access to a dress form"/>
+          </div>
+        </div>
+
+        <!-- Curriculum -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,#d5eaf5,#5a9ec4);">📋</div>
+            <div><h3>Course <em>Curriculum</em></h3><p>Build your lessons — drag to reorder</p></div>
+          </div>
+
+          <div class="lesson-list" id="lessonList">
+            <div class="lesson-row">
+              <span class="drag-handle">⠿</span>
+              <div class="lesson-num">1</div>
+              <div class="lesson-details">
+                <input type="text" value="Introduction to Fabric Draping"/>
+                <small>No video uploaded yet · 0:00</small>
+              </div>
+              <div class="lesson-actions">
+                <button class="lesson-action-btn" title="Upload video" onclick="triggerLessonUpload(this)">🎬</button>
+                <button class="lesson-action-btn" title="Delete" onclick="this.closest('.lesson-row').remove(); renumberLessons()">🗑️</button>
+              </div>
+            </div>
+            <div class="lesson-row">
+              <span class="drag-handle">⠿</span>
+              <div class="lesson-num">2</div>
+              <div class="lesson-details">
+                <input type="text" value="Tools & Materials Overview"/>
+                <small>video_tools.mp4 · 12:34</small>
+              </div>
+              <div class="lesson-actions">
+                <button class="lesson-action-btn" onclick="triggerLessonUpload(this)">🎬</button>
+                <button class="lesson-action-btn" onclick="this.closest('.lesson-row').remove(); renumberLessons()">🗑️</button>
+              </div>
+            </div>
+            <div class="lesson-row">
+              <span class="drag-handle">⠿</span>
+              <div class="lesson-num">3</div>
+              <div class="lesson-details">
+                <input type="text" value="Your First Drape: Step by Step"/>
+                <small>No video uploaded yet · 0:00</small>
+              </div>
+              <div class="lesson-actions">
+                <button class="lesson-action-btn" onclick="triggerLessonUpload(this)">🎬</button>
+                <button class="lesson-action-btn" onclick="this.closest('.lesson-row').remove(); renumberLessons()">🗑️</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="add-lesson-btn" onclick="addLesson()">
+            <span style="font-size:20px;line-height:1;">+</span> Add New Lesson
+          </button>
+
+          <div class="help-tip" style="margin-top:16px;">
+            📹 Upload lesson videos individually per lesson, or use the bulk upload below.
+          </div>
+        </div>
+
+        <!-- Bulk Video Upload -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,#f5d5e0,#c45a7e);">🎬</div>
+            <div><h3>Bulk Video <em>Upload</em></h3><p>Upload all your lesson videos at once</p></div>
+          </div>
+
+          <div class="upload-zone" id="bulkZone">
+            <input type="file" accept="video/*" multiple onchange="handleVideos(this.files)"/>
+            <div class="uz-icon">🎥</div>
+            <h4>Drag & drop lesson videos</h4>
+            <p>Upload multiple videos — they'll be auto-matched to your lessons by filename</p>
+            <div class="uz-formats">
+              <span class="uz-format">MP4</span><span class="uz-format">MOV</span>
+              <span class="uz-format">AVI</span><span class="uz-format">Max 2GB/file</span>
+            </div>
+          </div>
+
+          <div class="video-list" id="bulkVideoList"></div>
+        </div>
+
+        <!-- Thumbnail & Pricing -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,#d5f5e0,#4ab87a);">💰</div>
+            <div><h3>Thumbnail & <em>Pricing</em></h3><p>Set your course cover and price</p></div>
+          </div>
+
+          <div class="two-col" style="margin-bottom:20px;">
+            <div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Course Thumbnail</label>
+              </div>
+              <div class="upload-zone" style="padding:24px;margin-top:7px;">
+                <input type="file" accept="image/*"/>
+                <div class="uz-icon" style="font-size:30px;">🖼️</div>
+                <h4 style="font-size:13px;">Upload Thumbnail</h4>
+                <p style="font-size:11px;">1280×720 recommended</p>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label>Preview / Trailer Video <span>(optional)</span></label>
+                <div class="upload-zone" style="padding:24px;margin-top:0;">
+                  <input type="file" accept="video/*"/>
+                  <div class="uz-icon" style="font-size:30px;">▶️</div>
+                  <h4 style="font-size:13px;">Upload Trailer</h4>
+                  <p style="font-size:11px;">Max 3 minutes, shown free to all</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Pricing Model</label>
+            <div class="price-cards">
+              <div class="price-card sel" onclick="selectPrice(this)">
+                <div class="pc-icon">💳</div>
+                <div class="pc-title">Paid</div>
+                <div class="pc-desc">One-time purchase</div>
+              </div>
+              <div class="price-card" onclick="selectPrice(this)">
+                <div class="pc-icon">🆓</div>
+                <div class="pc-title">Free</div>
+                <div class="pc-desc">Available to all</div>
+              </div>
+              <div class="price-card" onclick="selectPrice(this)">
+                <div class="pc-icon">🔐</div>
+                <div class="pc-title">Subscription</div>
+                <div class="pc-desc">Monthly access</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-col" style="margin-top:16px;" id="priceFields">
+            <div class="form-group">
+              <label>Price (₹)</label>
+              <input type="number" id="priceInput" name="price" placeholder="1299" min="0" oninput="updatePreview()"/>
+            </div>
+            <div class="form-group">
+              <label>Discounted Price <span>(optional)</span></label>
+              <input type="number" placeholder="999" min="0"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Course Language</label>
+            <select>
+              <option>English</option><option>Hindi</option><option>Marathi</option>
+              <option>Tamil</option><option>Telugu</option><option>Kannada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary">Save Draft</button>
+          <button class="btn-primary" id="publishCourseBtn">🚀 Publish Course</button>
+        </div>
+
+      </div><!-- /.form-col -->
+
+      <!-- LIVE PREVIEW SIDEBAR -->
+      <div class="preview-card">
+        <div class="preview-thumb">
+          <div class="preview-thumb-text">🧵</div>
+          <div class="preview-play">▶</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-tag">Draping · Beginner</div>
+          <div class="preview-title" id="previewTitle"><em>Fundamentals of</em> Fabric Draping</div>
+          <div class="preview-meta">
+            <span>👩‍🏫 by {{ user.first_name }} {{ user.last_name }}</span>
+            <span>📹 3 lessons · ~45 min</span>
+            <span>⭐ New Course</span>
+          </div>
+          <div class="preview-price" id="previewPrice">₹1,299 <span>one-time</span></div>
+          <button class="btn-preview">Enroll Now →</button>
+          <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">This is how your course appears to learners</p>
+        </div>
+      </div>
+
+    </form><!-- /.page -->
+  </div>
+
+  <script>
+    document.querySelectorAll('button').forEach((btn) => {
+      btn.type = btn.id === 'publishCourseBtn' ? 'submit' : 'button';
+    });
+
+    function updatePreview() {
+      const title = document.getElementById('courseTitle').value || 'Your Course Title';
+      const price = document.getElementById('priceInput').value;
+      document.getElementById('previewTitle').innerHTML = '<em>' + title.split(' ').slice(0,2).join(' ') + '</em> ' + title.split(' ').slice(2).join(' ');
+      if (price) document.getElementById('previewPrice').innerHTML = '₹' + parseInt(price).toLocaleString('en-IN') + ' <span>one-time</span>';
+    }
+
+    let lessonCount = 3;
+    function addLesson() {
+      lessonCount++;
+      const list = document.getElementById('lessonList');
+      const row = document.createElement('div');
+      row.className = 'lesson-row';
+      row.innerHTML = `
+        <span class="drag-handle">⠿</span>
+        <div class="lesson-num">${lessonCount}</div>
+        <div class="lesson-details">
+          <input type="text" placeholder="Lesson ${lessonCount} title..."/>
+          <small>No video uploaded · 0:00</small>
+        </div>
+        <div class="lesson-actions">
+          <button class="lesson-action-btn" onclick="triggerLessonUpload(this)">🎬</button>
+          <button class="lesson-action-btn" onclick="this.closest('.lesson-row').remove(); renumberLessons()">🗑️</button>
+        </div>`;
+      list.appendChild(row);
+    }
+
+    function renumberLessons() {
+      document.querySelectorAll('.lesson-num').forEach((el, i) => el.textContent = i + 1);
+    }
+
+    function triggerLessonUpload(btn) {
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'video/*';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const small = btn.closest('.lesson-row').querySelector('small');
+          small.textContent = file.name + ' · Uploading...';
+          setTimeout(() => { small.textContent = file.name + ' · Ready ✓'; }, 2000);
+        }
+      };
+      input.click();
+    }
+
+    function handleVideos(files) {
+      const list = document.getElementById('bulkVideoList');
+      Array.from(files).forEach((file, i) => {
+        const item = document.createElement('div');
+        item.className = 'video-item';
+        const size = (file.size / (1024*1024)).toFixed(1);
+        const pid = 'vp' + Date.now() + i;
+        item.innerHTML = `
+          <div class="vthumb">▶</div>
+          <div class="vinfo">
+            <span>${file.name}</span>
+            <small>${size} MB</small>
+            <div class="vprog"><div class="vprog-bar" id="${pid}" style="width:0%"></div></div>
+          </div>
+          <button class="rm-btn" onclick="this.parentElement.remove()">✕</button>`;
+        list.appendChild(item);
+        let w = 0;
+        const iv = setInterval(() => {
+          w += Math.random() * 20 + 5;
+          if (w >= 100) { w = 100; clearInterval(iv); }
+          const el = document.getElementById(pid);
+          if (el) el.style.width = w + '%';
+        }, 180);
+      });
+    }
+
+    function selectPrice(card) {
+      document.querySelectorAll('.price-card').forEach(c => c.classList.remove('sel'));
+      card.classList.add('sel');
+      document.getElementById('priceFields').style.display = card.querySelector('.pc-title').textContent === 'Free' ? 'none' : 'grid';
+    }
+  </script>
+</body>
+</html>

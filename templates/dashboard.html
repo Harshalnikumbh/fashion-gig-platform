@@ -178,6 +178,112 @@
       gap: 16px;
     }
 
+    .profile-menu-wrap { position: relative; }
+    .profile-trigger { border: none; background: none; cursor: pointer; padding: 0; }
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 220px;
+      background: var(--white);
+      border: 1px solid rgba(201,169,110,0.18);
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+      padding: 10px;
+      display: none;
+      z-index: 120;
+    }
+
+    .profile-dropdown.open { display: block; }
+
+    .profile-dropdown-head {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid rgba(201,169,110,0.14);
+      margin-bottom: 8px;
+    }
+
+    .profile-dropdown-head strong { display: block; font-size: 13px; }
+    .profile-dropdown-head small { color: var(--muted); font-size: 11px; }
+
+    .profile-dropdown a,
+    .profile-dropdown button {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      text-decoration: none;
+      color: var(--ink);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      display: block;
+      font-family: inherit;
+    }
+
+    .profile-dropdown a:hover,
+    .profile-dropdown button:hover { background: #f7f2ea; color: var(--gold-dark); }
+
+    .profile-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.38);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .profile-modal.open { display: flex; }
+
+    .profile-card {
+      width: min(100%, 520px);
+      background: var(--white);
+      border-radius: 18px;
+      padding: 26px 26px 22px;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.18);
+    }
+
+    .profile-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 300;
+      margin-bottom: 6px;
+    }
+
+    .profile-card p { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+    .profile-form { display: grid; gap: 14px; }
+    .profile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .profile-field label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 6px; }
+
+    .profile-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 10px;
+      font: inherit;
+      outline: none;
+    }
+
+    .profile-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,0.14); }
+
+    .profile-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .profile-actions button {
+      border-radius: 999px;
+      padding: 11px 18px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .btn-cancel-profile { background: none; border: 1.5px solid rgba(0,0,0,0.12); }
+    .btn-save-profile { background: var(--dark); color: var(--white); border: none; }
+
     .search-bar {
       display: flex;
       align-items: center;
@@ -733,35 +839,26 @@
       </svg>
     </div>
 
-    <div class="sidebar-user">
-      <div class="user-avatar">S</div>
-      <div class="user-meta">
-        <span>Sanjivani Sharma</span>
-        <small>🌸 Learner</small>
-      </div>
-    </div>
-
     <ul class="sidebar-nav">
       <li class="nav-section-label">Main</li>
-      <li><a href="#" class="active"><span class="nav-icon">🏠</span> Dashboard</a></li>
-      <li><a href="#"><span class="nav-icon">📚</span> My Courses</a></li>
-      <li><a href="#"><span class="nav-icon">🎬</span> Video Library</a></li>
+      <li><a href="/dashboard" class="active"><span class="nav-icon">🏠</span> Dashboard</a></li>
+      <li><a href="/my-courses"><span class="nav-icon">📚</span> My Courses</a></li>
+      <li><a href="/video-library"><span class="nav-icon">🎬</span> Video Library</a></li>
       <li><a href="#"><span class="nav-icon">📁</span> My Portfolio</a></li>
 
       <li class="nav-section-label">Opportunities</li>
-      <li><a href="#"><span class="nav-icon">🪡</span> Browse Gigs</a></li>
-      <li><a href="#"><span class="nav-icon">💼</span> My Applications</a></li>
+      <li><a href="/browse-gigs"><span class="nav-icon">🪡</span> Browse Gigs</a></li>
+      <li><a href="/my-applications"><span class="nav-icon">💼</span> My Applications</a></li>
       <li><a href="#"><span class="nav-icon">⭐</span> Saved</a></li>
 
-      <li class="nav-section-label">Community</li>
-      <li><a href="#"><span class="nav-icon">🎨</span> Style Boards</a></li>
-      <li><a href="#"><span class="nav-icon">💬</span> Critiques</a></li>
-      <li><a href="#"><span class="nav-icon">🏅</span> Leaderboard</a></li>
     </ul>
 
-    <div class="sidebar-bottom">
-      <a href="#"><span>⚙️</span> Settings</a>
-      <a href="/signin"><span>🚪</span> Sign Out</a>
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ user.first_name[0] | upper }}</div>
+      <div class="user-meta">
+        <span>{{ user.first_name }} {{ user.last_name }}</span>
+        <small>{% if user.role == 'learner' %}🌸{% else %}✂️{% endif %} {{ user.role | capitalize }}</small>
+      </div>
     </div>
   </aside>
 
@@ -782,9 +879,49 @@
           🔔
           <div class="notif-dot"></div>
         </div>
-        <div class="user-avatar" style="width:36px;height:36px;font-size:15px">S</div>
+        <div class="profile-menu-wrap">
+          <button class="profile-trigger" id="profileMenuBtn" type="button" aria-label="Open profile menu">
+            <div class="user-avatar" style="width:36px;height:36px;font-size:15px">{{ user.first_name[:1] }}</div>
+          </button>
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-dropdown-head">
+              <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+              <small>{{ user.email or 'Learner Account' }}</small>
+            </div>
+            <button type="button" id="openProfileModal">Edit Profile</button>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
       </div>
     </header>
+
+    <div class="profile-modal" id="profileModal">
+      <div class="profile-card">
+        <h3>Edit Profile</h3>
+        <p>Update your basic account details.</p>
+        <form class="profile-form" method="POST" action="/profile">
+          <input type="hidden" name="next" value="/dashboard"/>
+          <div class="profile-row">
+            <div class="profile-field">
+              <label>First Name</label>
+              <input type="text" name="first_name" value="{{ user.first_name }}" required/>
+            </div>
+            <div class="profile-field">
+              <label>Last Name</label>
+              <input type="text" name="last_name" value="{{ user.last_name }}" required/>
+            </div>
+          </div>
+          <div class="profile-field">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ user.email or '' }}" required/>
+          </div>
+          <div class="profile-actions">
+            <button class="btn-cancel-profile" type="button" id="closeProfileModal">Cancel</button>
+            <button class="btn-save-profile" type="submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- PAGE BODY -->
     <div class="page-body">
@@ -793,20 +930,20 @@
       <div class="welcome-banner">
         <div class="welcome-text">
           <p>✦ Good morning</p>
-          <h1>Welcome back, <em>Sanjivani</em></h1>
-          <small>You're on a 5-day learning streak. Keep it going! 🔥</small>
+          <h1>Welcome back, <em>{{ user.first_name }}</em></h1>
+          <small>Keep learning and growing! 🔥</small>
         </div>
         <div class="welcome-stats">
           <div class="w-stat">
-            <strong>3</strong>
+            <strong>{{ stats.active_courses }}</strong>
             <span>Active Courses</span>
           </div>
           <div class="w-stat">
-            <strong>12</strong>
+            <strong>{{ stats.hours_learned }}</strong>
             <span>Hours Learned</span>
           </div>
           <div class="w-stat">
-            <strong>2</strong>
+            <strong>{{ stats.gigs_applied }}</strong>
             <span>Gigs Applied</span>
           </div>
         </div>
@@ -817,22 +954,33 @@
         <h3>Continue <em>Learning</em></h3>
         <a href="#">View all courses →</a>
       </div>
-      <div class="continue-grid">
-
+     <div class="continue-grid">
+        {% set thumb_colors = ['ct1','ct2','ct3'] %}
+        {% for e in enrollments %}
         <div class="course-card">
-          <div class="course-thumb ct1">
+          <div class="course-thumb {{ thumb_colors[loop.index0 % 3] }}">
             <div class="thumb-play">▶</div>
-            <div class="thumb-label">Draping</div>
+            <div class="thumb-label">{{ e.course.title.split()[0] }}</div>
           </div>
           <div class="course-info">
-            <h4>Fundamentals of Fabric Draping</h4>
-            <small>by Meera Kapoor</small>
+            <h4>{{ e.course.title }}</h4>
+            <small>by {{ e.course.creator.first_name }} {{ e.course.creator.last_name }}</small>
             <div class="progress-wrap">
-              <div class="progress-meta"><span>Lesson 5 of 12</span><span>42%</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+              <div class="progress-meta">
+                <span>{{ e.progress | int }}% complete</span>
+                <span>{{ e.progress | int }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ e.progress | int }}%"></div>
+              </div>
             </div>
           </div>
         </div>
+        {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
+          <p>No courses yet. <a href="/browse-gigs" style="color:var(--gold)">Browse courses →</a></p>
+        </div>
+        {% endfor %}
 
         <div class="course-card">
           <div class="course-thumb ct2">
@@ -863,7 +1011,6 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <!-- VIDEO LIBRARY -->
@@ -874,74 +1021,43 @@
 
       <div class="tabs">
         <button class="tab-btn active" onclick="setTab(this)">All Videos</button>
-        <button class="tab-btn" onclick="setTab(this)">Draping</button>
-        <button class="tab-btn" onclick="setTab(this)">Stitching</button>
-        <button class="tab-btn" onclick="setTab(this)">Illustration</button>
-        <button class="tab-btn" onclick="setTab(this)">Sustainable</button>
+        {% for item in video_items %}
+        {% set tag = item.tags[0] if item.tags else '' %}
+        {% if tag %}
+        <button class="tab-btn" onclick="setTab(this)">{{ tag }}</button>
+        {% endif %}
+        {% endfor %}
       </div>
 
       <div class="video-grid">
-
-        <div class="video-card">
-          <div class="video-thumb vt1">
+        {% set vt = ['vt1','vt2','vt3','vt4'] %}
+        {% for item in video_items %}
+        <div class="video-card" data-tags="{% for tag in item.tags %}{{ tag }}{% if not loop.last %},{% endif %}{% endfor %}">
+          <div class="video-thumb {{ vt[loop.index0 % 4] }}">
             <div class="v-play">▶</div>
-            <div class="video-dur">18:34</div>
+            <div class="video-dur">
+              {% if item.duration %}
+                {{ '%02d:%02d' | format(item.duration // 60, item.duration % 60) }}
+              {% else %}
+                --:--
+              {% endif %}
+            </div>
           </div>
           <div class="video-meta">
-            <h5>Advanced Saree Draping Techniques</h5>
-            <small>Meera Kapoor · 4.9 ⭐</small>
+            <h5>{{ item.title }}</h5>
+            <small>{{ item.instructor }}</small>
             <div class="video-tags">
-              <span class="v-tag">Draping</span>
-              <span class="v-tag">Saree</span>
+              {% for tag in item.tags %}
+              <span class="v-tag">{{ tag }}</span>
+              {% endfor %}
             </div>
           </div>
         </div>
-
-        <div class="video-card">
-          <div class="video-thumb vt2">
-            <div class="v-play">▶</div>
-            <div class="video-dur">24:10</div>
-          </div>
-          <div class="video-meta">
-            <h5>Reading & Grading Pattern Sheets</h5>
-            <small>Arjun Mehta · 4.8 ⭐</small>
-            <div class="video-tags">
-              <span class="v-tag">Patterns</span>
-              <span class="v-tag">Grading</span>
-            </div>
-          </div>
+        {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
+          <p>No videos available yet.</p>
         </div>
-
-        <div class="video-card">
-          <div class="video-thumb vt3">
-            <div class="v-play">▶</div>
-            <div class="video-dur">12:55</div>
-          </div>
-          <div class="video-meta">
-            <h5>Croquis Figure Drawing — Fashion Poses</h5>
-            <small>Divya Rao · 4.7 ⭐</small>
-            <div class="video-tags">
-              <span class="v-tag">Illustration</span>
-              <span class="v-tag">Drawing</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="video-card">
-          <div class="video-thumb vt4">
-            <div class="v-play">▶</div>
-            <div class="video-dur">31:22</div>
-          </div>
-          <div class="video-meta">
-            <h5>Eco Fabrics & Sustainable Sourcing</h5>
-            <small>Priya Nair · 4.9 ⭐</small>
-            <div class="video-tags">
-              <span class="v-tag">Sustainable</span>
-              <span class="v-tag">Fabric</span>
-            </div>
-          </div>
-        </div>
-
+        {% endfor %}
       </div>
 
       <!-- SKILL PROGRESS + UPCOMING -->
@@ -1003,64 +1119,28 @@
       </div>
 
       <div class="gig-grid">
-
+        {% for gig in gigs %}
         <div class="gig-card">
           <div class="gig-top">
-            <span class="gig-badge urgent">🔴 Urgent</span>
-            <span style="font-size:11px;color:var(--muted)">2 days left</span>
+            <span class="gig-badge">{{ gig.category or 'Gig' }}</span>
           </div>
-          <h4>Bridal Collection Designer — 12 Looks</h4>
-          <p>Looking for a skilled draper for a bridal trousseau line. Must know lehenga silhouettes and blouse patterns.</p>
+          <h4>{{ gig.title }}</h4>
+          <p>{{ gig.description[:120] }}{% if gig.description|length > 120 %}…{% endif %}</p>
           <div class="gig-footer">
             <div>
-              <div class="gig-budget">₹25,000 – ₹40,000</div>
+              <div class="gig-budget">₹{{ '{:,.0f}'.format(gig.budget) }}</div>
               <div class="gig-meta-row">
-                <span class="gig-meta-item">📍 Mumbai</span>
-                <span class="gig-meta-item">⏱ 3 weeks</span>
+                <span class="gig-meta-item">🌐 Open</span>
               </div>
             </div>
-            <button class="btn-apply">Apply →</button>
+            <button class="btn-apply" onclick="applyGig({{ gig.gig_id }}, this)">Apply →</button>
           </div>
         </div>
-
-        <div class="gig-card">
-          <div class="gig-top">
-            <span class="gig-badge">✂️ Pattern Making</span>
-            <span style="font-size:11px;color:var(--muted)">7 days left</span>
-          </div>
-          <h4>Streetwear Pattern Maker — Men's Line</h4>
-          <p>Youth streetwear brand needs pattern drafts for drop-shoulder tees, cargo trousers & hoodies in 3 sizes.</p>
-          <div class="gig-footer">
-            <div>
-              <div class="gig-budget">₹8,000 – ₹15,000</div>
-              <div class="gig-meta-row">
-                <span class="gig-meta-item">🌐 Remote</span>
-                <span class="gig-meta-item">⏱ 1 week</span>
-              </div>
-            </div>
-            <button class="btn-apply">Apply →</button>
-          </div>
+        {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
+          <p>No gigs posted yet.</p>
         </div>
-
-        <div class="gig-card">
-          <div class="gig-top">
-            <span class="gig-badge">🎨 Illustration</span>
-            <span style="font-size:11px;color:var(--muted)">12 days left</span>
-          </div>
-          <h4>Fashion Illustrator — Lookbook 2025</h4>
-          <p>Indie label needs 20 fashion illustrations for their upcoming spring/summer digital lookbook. Flat & croquis styles.</p>
-          <div class="gig-footer">
-            <div>
-              <div class="gig-budget">₹12,000 – ₹20,000</div>
-              <div class="gig-meta-row">
-                <span class="gig-meta-item">🌐 Remote</span>
-                <span class="gig-meta-item">⏱ 10 days</span>
-              </div>
-            </div>
-            <button class="btn-apply">Apply →</button>
-          </div>
-        </div>
-
+        {% endfor %}
       </div>
 
     </div><!-- /page-body -->
@@ -1068,20 +1148,79 @@
 
   <script>
 
+  function applyGig(gigId, btn) {
+    btn.disabled = true;
+    btn.textContent = '…';
+    fetch(`/api/gigs/${gigId}/apply`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    })
+    .then(r => r.json())
+    .then(d => {
+      btn.textContent = d.success ? '✓ Applied' : '✗ ' + (d.message || 'Error');
+      if (!d.success) btn.disabled = false;
+    })
+    .catch(() => { btn.textContent = 'Error'; btn.disabled = false; });
+  }
+
+
+
+  (function () {
+    const menuBtn = document.getElementById('profileMenuBtn');
+    const dropdown = document.getElementById('profileDropdown');
+    const modal = document.getElementById('profileModal');
+    const openModalBtn = document.getElementById('openProfileModal');
+    const closeModalBtn = document.getElementById('closeProfileModal');
+
+    if (menuBtn && dropdown) {
+      menuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+          dropdown.classList.remove('open');
+        }
+      });
+    }
+
+    if (openModalBtn && modal) {
+      openModalBtn.addEventListener('click', function () {
+        dropdown.classList.remove('open');
+        modal.classList.add('open');
+      });
+    }
+
+    if (closeModalBtn && modal) {
+      closeModalBtn.addEventListener('click', function () {
+        modal.classList.remove('open');
+      });
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+          modal.classList.remove('open');
+        }
+      });
+    }
+  }());
+
   function setTab(btn) {
+    const tag = btn.textContent.trim();
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    const selected = btn.textContent.trim();
-    document.querySelectorAll('.video-card').forEach(card => {
-      if (selected === 'All Videos') {
-        card.style.display = '';
+    const cards = document.querySelectorAll('.video-card');
+    cards.forEach(card => {
+      const cardTags = card.dataset.tags ? card.dataset.tags.split(',') : [];
+      if (tag === 'All Videos' || cardTags.includes(tag)) {
+        card.style.display = 'block';
       } else {
-        const tags = Array.from(card.querySelectorAll('.v-tag')).map(t => t.textContent.trim());
-        card.style.display = tags.includes(selected) ? '' : 'none';
+        card.style.display = 'none';
       }
     });
   }
+
   </script>
 </body>
 </html>

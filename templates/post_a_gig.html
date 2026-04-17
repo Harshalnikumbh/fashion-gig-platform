@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post a Gig — AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #C9A96E; --gold-light: #e8d5b7; --gold-dark: #a07840;
+      --dark: #1a1a1a; --cream: #faf7f2; --cream2: #f5ede0;
+      --white: #ffffff; --text: #2c2c2c; --muted: #7a7060;
+      --sidebar-w: 240px; --radius: 12px; --radius-sm: 6px;
+      --error: #c45a7e;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--dark); height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; padding: 28px 0; z-index: 100; overflow-y: auto; }
+    .sidebar-logo { padding: 0 24px 28px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .sidebar-logo svg { height: 32px; }
+    .sidebar-user { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.07); margin-bottom: 10px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-light), var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: var(--dark); flex-shrink: 0; }
+    .sidebar-user-info span { font-size: 13px; font-weight: 500; color: #fff; display: block; }
+    .sidebar-user-info small { font-size: 11px; color: var(--gold); }
+    .nav-group-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.28); padding: 14px 24px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 24px; font-size: 14px; color: rgba(255,255,255,.6); cursor: pointer; transition: all .2s; text-decoration: none; border-left: 2px solid transparent; }
+    .nav-item:hover { background: rgba(201,169,110,.08); color: var(--gold-light); }
+    .nav-item.active { background: rgba(201,169,110,.12); color: var(--gold); border-left-color: var(--gold); }
+    .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; }
+    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(250,247,242,.95); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(201,169,110,.18); padding: 14px 40px; display: flex; align-items: center; gap: 16px; }
+    .back-btn { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: var(--gold-dark); }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: var(--dark); }
+    .topbar-title em { color: var(--gold); }
+
+    /* CONTENT */
+    .page { padding: 36px 40px; max-width: 900px; }
+
+    /* PROGRESS STEPS */
+    .steps { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
+    .step { display: flex; align-items: center; gap: 10px; }
+    .step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; border: 2px solid rgba(201,169,110,.3); color: var(--muted); transition: all .3s; }
+    .step.active .step-circle { background: var(--gold); border-color: var(--gold); color: #fff; }
+    .step.done .step-circle { background: #4ab87a; border-color: #4ab87a; color: #fff; }
+    .step-label { font-size: 12px; color: var(--muted); font-weight: 400; }
+    .step.active .step-label { color: var(--dark); font-weight: 500; }
+    .step-line { flex: 1; height: 1px; background: rgba(201,169,110,.2); margin: 0 12px; min-width: 40px; }
+
+    /* CARDS */
+    .form-card { background: var(--white); border-radius: var(--radius); border: 1px solid rgba(201,169,110,.15); padding: 32px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,.04); }
+    .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid rgba(201,169,110,.12); }
+    .card-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, var(--gold-light), var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .card-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; }
+    .card-header h3 em { color: var(--gold); }
+    .card-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* FORM ELEMENTS */
+    .form-grid { display: grid; gap: 20px; }
+    .two-col { grid-template-columns: 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group label { font-size: 13px; font-weight: 500; color: var(--dark); }
+    .form-group label span { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 12px 16px; border: 1.5px solid rgba(0,0,0,.1); border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--white); color: var(--text);
+      transition: border-color .2s, box-shadow .2s; outline: none; resize: vertical;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,.15);
+    }
+    .form-group textarea { min-height: 100px; }
+    .char-count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
+
+    /* BUDGET RANGE */
+    .budget-row { display: flex; align-items: center; gap: 12px; }
+    .budget-row span { color: var(--muted); font-size: 14px; }
+    .budget-prefix { display: flex; align-items: center; background: var(--cream2); border: 1.5px solid rgba(0,0,0,.1); border-radius: var(--radius-sm); overflow: hidden; flex: 1; }
+    .budget-prefix span { padding: 0 12px; font-size: 14px; color: var(--gold-dark); font-weight: 500; border-right: 1px solid rgba(0,0,0,.08); white-space: nowrap; background: var(--cream2); }
+    .budget-prefix input { border: none; border-radius: 0; padding: 12px 14px; background: var(--white); flex: 1; min-width: 0; }
+    .budget-prefix input:focus { border: none; box-shadow: none; }
+
+    /* SKILLS TAGS */
+    .tags-input-wrap { border: 1.5px solid rgba(0,0,0,.1); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--white); min-height: 48px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; transition: border-color .2s; cursor: text; }
+    .tags-input-wrap:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,169,110,.15); }
+    .tag-chip { background: var(--cream2); border: 1px solid rgba(201,169,110,.3); color: var(--gold-dark); font-size: 12px; padding: 4px 10px; border-radius: 50px; display: flex; align-items: center; gap: 5px; }
+    .tag-chip button { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 0; line-height: 1; }
+    .tags-input-wrap input { border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; min-width: 120px; flex: 1; background: transparent; padding: 2px 4px; }
+
+    /* UPLOAD ZONE */
+    .upload-zone { border: 2px dashed rgba(201,169,110,.35); border-radius: var(--radius); padding: 40px 24px; text-align: center; cursor: pointer; transition: all .25s; background: var(--cream); position: relative; }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(201,169,110,.05); }
+    .upload-zone .uz-icon { font-size: 44px; margin-bottom: 12px; opacity: .7; }
+    .upload-zone h4 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+    .upload-zone p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    .uz-formats { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .uz-format { background: var(--white); border: 1px solid rgba(201,169,110,.2); color: var(--muted); font-size: 11px; padding: 3px 10px; border-radius: 50px; }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .browse-btn { display: inline-block; padding: 9px 22px; border-radius: 50px; background: var(--dark); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; pointer-events: none; }
+
+    /* VIDEO PREVIEW LIST */
+    .video-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .video-item { background: var(--cream2); border: 1px solid rgba(201,169,110,.2); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+    .video-thumb-mini { width: 48px; height: 36px; border-radius: 6px; background: var(--dark); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 16px; flex-shrink: 0; }
+    .video-file-info { flex: 1; }
+    .video-file-info span { font-size: 13px; font-weight: 500; display: block; }
+    .video-file-info small { font-size: 11px; color: var(--muted); }
+    .video-progress { height: 3px; background: rgba(201,169,110,.2); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+    .video-progress-bar { height: 100%; background: var(--gold); border-radius: 2px; transition: width .3s; }
+    .remove-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; transition: color .2s; }
+    .remove-btn:hover { color: var(--error); }
+
+    /* YOUTUBE SECTION */
+    .yt-links { display: flex; flex-direction: column; gap: 12px; }
+    .yt-link-row { display: flex; gap: 10px; align-items: flex-start; }
+    .yt-input-wrap { flex: 1; position: relative; }
+    .yt-input-wrap .yt-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+    .yt-input-wrap input { padding-left: 40px; width: 100%; }
+    .yt-preview { background: var(--cream); border: 1px solid rgba(201,169,110,.2); border-radius: var(--radius-sm); padding: 12px; margin-top: 8px; display: flex; gap: 12px; align-items: center; display: none; }
+    .yt-preview.show { display: flex; }
+    .yt-thumb { width: 80px; height: 54px; border-radius: 6px; background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; align-items: center; justify-content: center; color: #ff4444; font-size: 24px; flex-shrink: 0; }
+    .yt-preview-info span { font-size: 13px; font-weight: 500; display: block; }
+    .yt-preview-info small { font-size: 11px; color: var(--muted); }
+    .add-link-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gold-dark); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; padding: 8px 0; transition: opacity .2s; }
+    .add-link-btn:hover { opacity: .7; }
+    .remove-link-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 18px; padding: 10px 6px; transition: color .2s; }
+    .remove-link-btn:hover { color: var(--error); }
+
+    /* DIVIDER */
+    .or-divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; }
+    .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: rgba(201,169,110,.2); }
+    .or-divider span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* RADIO CARDS */
+    .radio-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .radio-card { border: 1.5px solid rgba(201,169,110,.2); border-radius: var(--radius-sm); padding: 16px; cursor: pointer; transition: all .2s; position: relative; }
+    .radio-card:hover { border-color: var(--gold); background: rgba(201,169,110,.04); }
+    .radio-card input[type="radio"] { position: absolute; opacity: 0; }
+    .radio-card.selected { border-color: var(--gold); background: rgba(201,169,110,.07); }
+    .radio-card.selected::after { content: '✓'; position: absolute; top: 10px; right: 12px; color: var(--gold); font-size: 14px; font-weight: 600; }
+    .rc-icon { font-size: 24px; margin-bottom: 8px; }
+    .rc-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+    .rc-desc { font-size: 11px; color: var(--muted); }
+
+    /* ACTIONS */
+    .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+    .btn-secondary { padding: 12px 28px; border-radius: 50px; border: 1.5px solid rgba(0,0,0,.15); background: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); cursor: pointer; transition: all .2s; }
+    .btn-secondary:hover { border-color: var(--gold); color: var(--gold-dark); }
+    .btn-primary { padding: 13px 32px; border-radius: 50px; background: var(--dark); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all .25s; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    .btn-primary:hover { background: var(--gold); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,169,110,.3); }
+
+    /* HELP TIP */
+    .help-tip { background: rgba(201,169,110,.07); border: 1px solid rgba(201,169,110,.2); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 12px; color: var(--gold-dark); display: flex; gap: 8px; align-items: flex-start; }
+    .form-message { margin-bottom: 18px; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 13px; }
+    .form-message.error { background: rgba(196,90,126,.08); border: 1px solid rgba(196,90,126,.2); color: #9b4063; }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo, .sidebar-user-info, .nav-group-label { display: none; }
+      .nav-item { padding: 12px 18px; }
+      .nav-item .label { display: none; }
+      .main { margin-left: 60px; }
+      .page { padding: 24px 20px; }
+      .two-col { grid-template-columns: 1fr; }
+      .radio-cards { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar">{{ user.first_name[:1] }}</div>
+      <div class="sidebar-user-info">
+        <span>{{ user.first_name }} {{ user.last_name }}</span>
+        <small>{{ user.speciality or 'Creator' }}</small>
+      </div>
+    </div>
+    <span class="nav-group-label">Creator</span>
+    <a href="/creator-dashboard" class="nav-item"><span class="icon">🏠</span><span class="label">Dashboard</span></a>
+    <a href="/post-a-gig" class="nav-item active"><span class="icon">➕</span><span class="label">Post a Gig</span></a>
+    <a href="/upload-course" class="nav-item"><span class="icon">⬆️</span><span class="label">Upload Course</span></a>
+    <a href="/logout" class="nav-item"><span class="icon">🚪</span><span class="label">Sign Out</span></a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <a href="/creator-dashboard" class="back-btn">← Back to Dashboard</a>
+      <div style="width:1px;height:20px;background:rgba(201,169,110,.3);"></div>
+      <div class="topbar-title">Post a <em>Gig</em></div>
+    </div>
+
+    <form class="page" method="POST" action="{{ url_for('post_a_gig') }}">
+      {% if error_message %}
+      <div class="form-message error">{{ error_message }}</div>
+      {% endif %}
+
+      <!-- Progress Steps -->
+      <div class="steps">
+        <div class="step active">
+          <div class="step-circle" id="s1">1</div>
+          <div class="step-label">Gig Details</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step2">
+          <div class="step-circle" id="s2">2</div>
+          <div class="step-label">Requirements</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3">
+          <div class="step-circle" id="s3">3</div>
+          <div class="step-label">Publish</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: GIG DETAILS -->
+      <div id="page-1">
+
+        <!-- Basic Info -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon">🪡</div>
+            <div>
+              <h3>Gig <em>Details</em></h3>
+              <p>Tell designers what you're looking for</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Gig Title <span>*</span></label>
+              <input type="text" id="gigTitle" name="gig_title" placeholder="e.g. Bridal Collection Designer for Spring Wedding" maxlength="80" oninput="updateCharCount(this, 'titleCount', 80)"/>
+              <div class="char-count"><span id="titleCount">0</span>/80</div>
+            </div>
+
+            <div class="form-grid two-col">
+              <div class="form-group">
+                <label>Category <span>*</span></label>
+                <select name="category">
+                  <option value="">Select category...</option>
+                  <option>Bridal & Wedding</option>
+                  <option>Haute Couture</option>
+                  <option>Streetwear & Urban</option>
+                  <option>Pattern Making</option>
+                  <option>Fashion Illustration</option>
+                  <option>Sustainable Fashion</option>
+                  <option>Accessories Design</option>
+                  <option>Textile & Fabric</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Experience Level</label>
+                <select>
+                  <option>Any Level</option>
+                  <option>Beginner (0–2 yrs)</option>
+                  <option>Intermediate (2–5 yrs)</option>
+                  <option>Expert (5+ yrs)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Description <span>*</span></label>
+              <textarea id="gigDesc" name="description" placeholder="Describe your project in detail — style, occasion, references, expectations..." rows="5" maxlength="800" oninput="updateCharCount(this, 'descCount', 800)"></textarea>
+              <div class="char-count"><span id="descCount">0</span>/800</div>
+            </div>
+
+            <div class="form-group">
+              <label>Skills Required</label>
+              <div class="tags-input-wrap" id="tagsWrap">
+                <span class="tag-chip">Draping <button onclick="removeTag(this)">×</button></span>
+                <span class="tag-chip">Pattern Making <button onclick="removeTag(this)">×</button></span>
+                <input type="text" id="tagInput" placeholder="Add skill + Enter" onkeydown="addTag(event)"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget & Timeline -->
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,#d5f5e0,#4ab87a);">💰</div>
+            <div>
+              <h3>Budget & <em>Timeline</em></h3>
+              <p>Set your project budget and deadline</p>
+            </div>
+          </div>
+
+          <div class="form-grid two-col">
+            <div class="form-group">
+              <label>Minimum Budget (₹)</label>
+              <div class="budget-prefix">
+                <span>₹</span>
+                <input type="number" name="min_budget" placeholder="5000" min="0"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Maximum Budget (₹)</label>
+              <div class="budget-prefix">
+                <span>₹</span>
+                <input type="number" name="max_budget" placeholder="20000" min="0"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Project Deadline</label>
+              <input type="date"/>
+            </div>
+            <div class="form-group">
+              <label>Duration</label>
+              <select>
+                <option>1–3 days</option>
+                <option>1 week</option>
+                <option>2 weeks</option>
+                <option selected>1 month</option>
+                <option>Ongoing</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="help-tip" style="margin-top:16px;">
+            💡 Gigs with clear budget ranges receive <strong>3× more applications</strong> on average.
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary">Save Draft</button>
+          <button class="btn-primary" onclick="goToStep(2)">Continue: Requirements →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: REQUIREMENTS -->
+      <div id="page-2" style="display:none;">
+        <div class="form-card">
+          <div class="card-header">
+            <div class="card-icon" style="background:linear-gradient(135deg,#f5f0d5,#c4aa4a);">📋</div>
+            <div>
+              <h3>Applicant <em>Requirements</em></h3>
+              <p>What do you need from applicants?</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>What to submit when applying</label>
+              <div class="radio-cards" id="submitType">
+                <div class="radio-card selected" onclick="selectRadio(this)">
+                  <input type="radio" name="submit" checked/>
+                  <div class="rc-icon">🗂️</div>
+                  <div class="rc-title">Portfolio Link</div>
+                  <div class="rc-desc">Link to their portfolio site</div>
+                </div>
+                <div class="radio-card" onclick="selectRadio(this)">
+                  <input type="radio" name="submit"/>
+                  <div class="rc-icon">📄</div>
+                  <div class="rc-title">CV / Resume</div>
+                  <div class="rc-desc">Upload a PDF resume</div>
+                </div>
+                <div class="radio-card" onclick="selectRadio(this)">
+                  <input type="radio" name="submit"/>
+                  <div class="rc-icon">🎨</div>
+                  <div class="rc-title">Sample Work</div>
+                  <div class="rc-desc">Images of previous work</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Cover Letter</label>
+              <div class="radio-cards" style="grid-template-columns:1fr 1fr;">
+                <div class="radio-card selected" onclick="selectRadio(this, 'cover')">
+                  <input type="radio" name="cover" checked/>
+                  <div class="rc-icon">✅</div>
+                  <div class="rc-title">Required</div>
+                  <div class="rc-desc">Applicants must write a cover letter</div>
+                </div>
+                <div class="radio-card" onclick="selectRadio(this, 'cover')">
+                  <input type="radio" name="cover"/>
+                  <div class="rc-icon">⭕</div>
+                  <div class="rc-title">Optional</div>
+                  <div class="rc-desc">Cover letter is not required</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Specific Questions for Applicants <span>(optional)</span></label>
+              <textarea placeholder="e.g. Have you worked on bridal collections before? What's your turnaround time for a 12-piece collection?" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Location Preference</label>
+              <div class="radio-cards" style="grid-template-columns:1fr 1fr 1fr;">
+                <div class="radio-card selected" onclick="selectRadio(this, 'loc')"><div class="rc-icon">🌐</div><div class="rc-title">Remote</div><div class="rc-desc">Work from anywhere</div></div>
+                <div class="radio-card" onclick="selectRadio(this, 'loc')"><div class="rc-icon">📍</div><div class="rc-title">Mumbai only</div><div class="rc-desc">On-site required</div></div>
+                <div class="radio-card" onclick="selectRadio(this, 'loc')"><div class="rc-icon">🔀</div><div class="rc-title">Hybrid</div><div class="rc-desc">Mix of both</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+          <button class="btn-primary" onclick="goToStep(3)">Review & Publish →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: PUBLISH -->
+      <div id="page-3" style="display:none;">
+        <div class="form-card" style="text-align:center;padding:60px 40px;">
+          <div style="font-size:64px;margin-bottom:20px;">🎉</div>
+          <h3 style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;margin-bottom:12px;">Ready to <em style="color:var(--gold)">Publish?</em></h3>
+          <p style="color:var(--muted);font-size:15px;max-width:420px;margin:0 auto 32px;line-height:1.7;">Your gig will be reviewed and go live within a few hours. You'll receive applications directly in your dashboard.</p>
+          <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn-secondary" onclick="goToStep(2)">← Edit Details</button>
+            <button class="btn-primary" id="publishGigBtn" style="padding:14px 40px;font-size:15px;">🚀 Publish Gig</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:20px;">By publishing you agree to AtelierX <a href="#" style="color:var(--gold-dark)">Gig Posting Guidelines</a>.</p>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    document.querySelectorAll('button').forEach((btn) => {
+      btn.type = btn.id === 'publishGigBtn' ? 'submit' : 'button';
+    });
+
+    function goToStep(n) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById('page-' + i).style.display = i === n ? 'block' : 'none';
+        const sc = document.getElementById('s' + i);
+        const stepEl = sc.closest('.step');
+        if (i < n) {
+          stepEl.classList.add('done'); stepEl.classList.remove('active');
+          sc.textContent = '✓';
+        } else if (i === n) {
+          stepEl.classList.add('active'); stepEl.classList.remove('done');
+          sc.textContent = i;
+        } else {
+          stepEl.classList.remove('active', 'done');
+          sc.textContent = i;
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateCharCount(el, id, max) {
+      document.getElementById(id).textContent = el.value.length;
+    }
+
+    function addTag(e) {
+      if (e.key === 'Enter' && e.target.value.trim()) {
+        e.preventDefault();
+        const wrap = document.getElementById('tagsWrap');
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = e.target.value.trim() + ' <button onclick="removeTag(this)">×</button>';
+        wrap.insertBefore(chip, e.target);
+        e.target.value = '';
+      }
+    }
+
+    function removeTag(btn) { btn.parentElement.remove(); }
+
+    function selectRadio(card, group) {
+      const parent = card.parentElement;
+      parent.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

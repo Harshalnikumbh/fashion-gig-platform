@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Courses — AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A96E;
+      --gold-light: #e8d5b7;
+      --gold-dim: rgba(201,169,110,0.15);
+      --ink: #1a1a1a;
+      --ink2: #3a3a3a;
+      --muted: #888;
+      --surface: #faf8f5;
+      --white: #ffffff;
+      --sidebar-w: 240px;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--ink);
+      min-height: 100vh;
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0 24px;
+      z-index: 100;
+    }
+    .sidebar-brand { padding: 0 24px 32px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-brand svg { height: 32px; }
+    .sidebar-user { display: flex; align-items: center; gap: 12px; padding: 20px 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #a07840); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--white); font-weight: 600; flex-shrink: 0; }
+    .user-meta span { display: block; color: var(--white); font-size: 13px; font-weight: 500; line-height: 1.2; }
+    .user-meta small { color: var(--gold); font-size: 11px; letter-spacing: 0.5px; }
+    .sidebar-nav { flex: 1; padding: 20px 0; list-style: none; }
+    .nav-section-label { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 14px 24px 6px; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; font-weight: 400; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-nav li a:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+    .sidebar-nav li a.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,169,110,0.08); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-bottom { padding: 16px 24px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-bottom a { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.4); font-size: 13px; text-decoration: none; padding: 8px 0; transition: color 0.2s; }
+    .sidebar-bottom a:hover { color: rgba(255,255,255,0.7); }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+    /* ── TOPBAR ── */
+    .topbar { background: var(--white); border-bottom: 1px solid #ede9e2; padding: 0 36px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; }
+    .topbar-left h2 em { color: var(--gold); font-style: italic; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .search-bar { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid #e5e0d8; border-radius: 50px; padding: 7px 16px; min-width: 220px; }
+    .search-bar input { border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); width: 100%; }
+    .search-bar input::placeholder { color: var(--muted); }
+    .notif-btn { width: 38px; height: 38px; background: var(--surface); border: 1px solid #e5e0d8; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; position: relative; }
+    .notif-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; position: absolute; top: 6px; right: 6px; border: 2px solid var(--white); }
+
+    /* ── PAGE BODY ── */
+    .page-body { padding: 32px 36px 48px; }
+
+    /* ── STATS ROW ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--white); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; }
+    .stat-icon { width: 44px; height: 44px; background: var(--gold-dim); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-info strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--ink); line-height: 1; }
+    .stat-info span { font-size: 12px; color: var(--muted); }
+
+    /* ── FILTER BAR ── */
+    .filter-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .tabs { display: flex; gap: 4px; background: #ede9e2; border-radius: 10px; padding: 4px; width: fit-content; }
+    .tab-btn { padding: 7px 18px; border: none; background: transparent; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: var(--white); color: var(--ink); font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .sort-select { border: 1px solid #e5e0d8; background: var(--white); border-radius: 8px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink2); outline: none; cursor: pointer; }
+
+    /* ── COURSES GRID ── */
+    .courses-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+
+    .course-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.22s, box-shadow 0.22s; cursor: pointer; }
+    .course-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.11); }
+
+    .course-thumb { height: 150px; position: relative; overflow: hidden; }
+    .ct1 { background: linear-gradient(135deg, #2c1f12, #6b4c2a); }
+    .ct2 { background: linear-gradient(135deg, #1a2035, #3a4f7a); }
+    .ct3 { background: linear-gradient(135deg, #1f2c1a, #3a6b35); }
+    .ct4 { background: linear-gradient(135deg, #2c1a2c, #6b3a6b); }
+    .ct5 { background: linear-gradient(135deg, #1a2a2c, #2a6b6b); }
+    .ct6 { background: linear-gradient(135deg, #2c2a1a, #7a6b35); }
+
+    .thumb-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--white); backdrop-filter: blur(6px); transition: background 0.2s; }
+    .course-card:hover .thumb-play { background: rgba(201,169,110,0.5); }
+
+    .thumb-label { position: absolute; bottom: 10px; left: 12px; background: var(--gold); color: var(--white); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+    .thumb-badge { position: absolute; top: 10px; right: 12px; font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 500; letter-spacing: 0.4px; }
+    .badge-completed { background: rgba(50,180,100,0.85); color: #fff; }
+    .badge-in-progress { background: rgba(201,169,110,0.9); color: #fff; }
+    .badge-not-started { background: rgba(0,0,0,0.45); color: rgba(255,255,255,0.8); }
+
+    .course-info { padding: 16px 18px 18px; }
+    .course-info h4 { font-size: 14.5px; font-weight: 500; margin-bottom: 4px; line-height: 1.35; }
+    .course-info .by { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .course-meta-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .meta-pill { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+
+    .progress-wrap { margin-top: 0; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .progress-bar { height: 4px; background: #ede9e2; border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #a07840); border-radius: 10px; }
+
+    .course-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0ece5; }
+    .rating { font-size: 12px; color: var(--ink2); }
+    .btn-resume { background: var(--ink); color: var(--white); border: none; padding: 7px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s; text-decoration: none; display: inline-block; }
+    .btn-resume:hover { background: #333; }
+    .btn-enroll { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 7px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-enroll:hover { background: var(--gold); color: var(--white); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); display: none; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+    .empty-state p { font-size: 13px; margin-bottom: 20px; }
+    .btn-gold { background: var(--gold); color: var(--white); border: none; padding: 10px 24px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+
+    /* ── SECTION HEADER ── */
+    .section-hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+    .section-hd h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+    .section-hd h3 em { color: var(--gold); font-style: italic; }
+    .section-hd a { font-size: 12px; color: var(--gold); text-decoration: none; letter-spacing: 0.5px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) { .courses-grid { grid-template-columns: repeat(2, 1fr); } .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .courses-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2, 1fr); } .page-body { padding: 20px; } .topbar { padding: 0 20px; } }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ session.user.first_name[0] | upper }}</div>
+      <div class="user-meta">
+        <span>{{ session.user.first_name }} {{ session.user.last_name }}</span>
+        <small>{% if session.user.role == 'learner' %}🌸{% else %}✂️{% endif %} {{ session.user.role | capitalize }}</small>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="nav-section-label">Main</li>
+      <li><a href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a></li>
+      <li><a href="/my-courses" class="active"><span class="nav-icon">📚</span> My Courses</a></li>
+      <li><a href="/video-library"><span class="nav-icon">🎬</span> Video Library</a></li>
+      <li><a href="#"><span class="nav-icon">📁</span> My Portfolio</a></li>
+
+      <li class="nav-section-label">Opportunities</li>
+      <li><a href="#"><span class="nav-icon">🪡</span> Browse Gigs</a></li>
+      <li><a href="#"><span class="nav-icon">💼</span> My Applications</a></li>
+      <li><a href="#"><span class="nav-icon">⭐</span> Saved</a></li>
+
+    </ul>
+
+    <div class="sidebar-bottom">
+      <a href="#"><span>⚙️</span> Settings</a>
+      <a href="/logout"><span>🚪</span> Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2>My <em>Courses</em></h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" id="courseSearch" placeholder="Search your courses…" oninput="filterCourses()"/>
+        </div>
+        <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+        <div class="user-avatar" style="width:36px;height:36px;font-size:15px">{{ session.user.first_name[0] | upper }}</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-info">
+            <strong>{{ enrollments | length }}</strong>
+            <span>Total Enrolled</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔄</div>
+          <div class="stat-info">
+            <strong>{{ enrollments | selectattr('progress', 'gt', 0) | selectattr('progress', 'lt', 100) | list | length }}</strong>
+            <span>In Progress</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <strong>{{ enrollments | selectattr('progress', 'equalto', 100) | list | length }}</strong>
+            <span>Completed</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱</div>
+          <div class="stat-info">
+            <strong>{{ total_hours }}h</strong>
+            <span>Hours Learned</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="setTab(this, 'all')">All</button>
+          <button class="tab-btn" onclick="setTab(this, 'in-progress')">In Progress</button>
+          <button class="tab-btn" onclick="setTab(this, 'completed')">Completed</button>
+          <button class="tab-btn" onclick="setTab(this, 'not-started')">Not Started</button>
+        </div>
+        <select class="sort-select" onchange="sortCourses(this.value)">
+          <option value="recent">Recently Accessed</option>
+          <option value="progress-high">Progress: High → Low</option>
+          <option value="progress-low">Progress: Low → High</option>
+          <option value="az">A → Z</option>
+        </select>
+      </div>
+
+      <!-- COURSES GRID -->
+      <div class="section-hd">
+        <h3>Your <em>Learning Journey</em></h3>
+        <a href="/explore">Browse more courses →</a>
+      </div>
+
+      <div class="courses-grid" id="coursesGrid">
+
+        {% for item in enrollments %}
+        {% set course = item.course %}
+        {% set pct = item.progress | int %}
+        {% if pct == 100 %}
+          {% set status = 'completed' %}
+          {% set badge_class = 'badge-completed' %}
+          {% set badge_label = '✓ Completed' %}
+        {% elif pct > 0 %}
+          {% set status = 'in-progress' %}
+          {% set badge_class = 'badge-in-progress' %}
+          {% set badge_label = 'In Progress' %}
+        {% else %}
+          {% set status = 'not-started' %}
+          {% set badge_class = 'badge-not-started' %}
+          {% set badge_label = 'Not Started' %}
+        {% endif %}
+
+        <div class="course-card" data-status="{{ status }}" data-title="{{ course.title | lower }}">
+          <div class="course-thumb ct{{ loop.index % 6 + 1 }}">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">{{ course.category | default('Course') }}</div>
+            <div class="thumb-badge {{ badge_class }}">{{ badge_label }}</div>
+          </div>
+          <div class="course-info">
+            <h4>{{ course.title }}</h4>
+            <p class="by">by {{ course.creator.first_name }} {{ course.creator.last_name }}</p>
+            <div class="course-meta-row">
+              <span class="meta-pill">📹 {{ course.lesson_count | default(10) }} lessons</span>
+              <span class="meta-pill">⏱ {{ course.duration_hours | default(6) }}h</span>
+              <span class="meta-pill">⭐ {{ course.avg_rating | default('4.8') }}</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-meta">
+                <span>Lesson {{ (pct / 100 * course.lesson_count | default(10)) | int }} of {{ course.lesson_count | default(10) }}</span>
+                <span>{{ pct }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ pct }}%"></div>
+              </div>
+            </div>
+            <div class="course-footer">
+              <span class="rating">⭐ {{ course.avg_rating | default('4.8') }}</span>
+              {% if pct == 100 %}
+                <a href="/course/{{ course.course_id }}/certificate" class="btn-enroll">View Certificate</a>
+              {% elif pct > 0 %}
+                <a href="/course/{{ course.course_id }}/learn" class="btn-resume">Resume →</a>
+              {% else %}
+                <a href="/course/{{ course.course_id }}/learn" class="btn-resume">Start →</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Static fallback cards for design reference (remove when backend is live) -->
+        <div class="course-card" data-status="in-progress" data-title="fundamentals of fabric draping">
+          <div class="course-thumb ct1">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Draping</div>
+            <div class="thumb-badge badge-in-progress">In Progress</div>
+          </div>
+          <div class="course-info">
+            <h4>Fundamentals of Fabric Draping</h4>
+            <p class="by">by Meera Kapoor</p>
+            <div class="course-meta-row">
+              <span class="meta-pill">📹 12 lessons</span>
+              <span class="meta-pill">⏱ 8h</span>
+              <span class="meta-pill">⭐ 4.9</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 5 of 12</span><span>42%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+            </div>
+            <div class="course-footer">
+              <span class="rating">⭐ 4.9</span>
+              <a href="#" class="btn-resume">Resume →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card" data-status="in-progress" data-title="zero to pro garment patterns">
+          <div class="course-thumb ct2">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Patterns</div>
+            <div class="thumb-badge badge-in-progress">In Progress</div>
+          </div>
+          <div class="course-info">
+            <h4>Zero to Pro: Garment Patterns</h4>
+            <p class="by">by Arjun Mehta</p>
+            <div class="course-meta-row">
+              <span class="meta-pill">📹 15 lessons</span>
+              <span class="meta-pill">⏱ 10h</span>
+              <span class="meta-pill">⭐ 4.8</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 2 of 15</span><span>13%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:13%"></div></div>
+            </div>
+            <div class="course-footer">
+              <span class="rating">⭐ 4.8</span>
+              <a href="#" class="btn-resume">Resume →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card" data-status="completed" data-title="fashion illustration for beginners">
+          <div class="course-thumb ct3">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Illustration</div>
+            <div class="thumb-badge badge-completed">✓ Completed</div>
+          </div>
+          <div class="course-info">
+            <h4>Fashion Illustration for Beginners</h4>
+            <p class="by">by Divya Rao</p>
+            <div class="course-meta-row">
+              <span class="meta-pill">📹 10 lessons</span>
+              <span class="meta-pill">⏱ 6h</span>
+              <span class="meta-pill">⭐ 4.7</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 10 of 10</span><span>100%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+            <div class="course-footer">
+              <span class="rating">⭐ 4.7</span>
+              <a href="#" class="btn-enroll">View Certificate</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card" data-status="not-started" data-title="sustainable fashion design">
+          <div class="course-thumb ct4">
+            <div class="thumb-play">▶</div>
+            <div class="thumb-label">Sustainable</div>
+            <div class="thumb-badge badge-not-started">Not Started</div>
+          </div>
+          <div class="course-info">
+            <h4>Sustainable Fashion Design</h4>
+            <p class="by">by Priya Nair</p>
+            <div class="course-meta-row">
+              <span class="meta-pill">📹 8 lessons</span>
+              <span class="meta-pill">⏱ 5h</span>
+              <span class="meta-pill">⭐ 4.9</span>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-meta"><span>Lesson 0 of 8</span><span>0%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+            </div>
+            <div class="course-footer">
+              <span class="rating">⭐ 4.9</span>
+              <a href="#" class="btn-resume">Start →</a>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /courses-grid -->
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📚</div>
+        <h3>No courses here yet</h3>
+        <p>Explore our catalogue and enrol in your first fashion course today.</p>
+        <a href="/explore" class="btn-gold">Browse Courses</a>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+
+  <script>
+    let currentTab = 'all';
+
+    function setTab(btn, filter) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = filter;
+      applyFilters();
+    }
+
+    function filterCourses() { applyFilters(); }
+
+    function applyFilters() {
+      const query = document.getElementById('courseSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.course-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const matchTab   = currentTab === 'all' || card.dataset.status === currentTab;
+        const matchQuery = card.dataset.title.includes(query);
+        const show = matchTab && matchQuery;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      document.getElementById('emptyState').style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    function sortCourses(val) {
+      const grid = document.getElementById('coursesGrid');
+      const cards = [...grid.querySelectorAll('.course-card')];
+
+      cards.sort((a, b) => {
+        if (val === 'az') return a.dataset.title.localeCompare(b.dataset.title);
+        if (val === 'progress-high') {
+          const pa = parseInt(a.querySelector('.progress-fill').style.width) || 0;
+          const pb = parseInt(b.querySelector('.progress-fill').style.width) || 0;
+          return pb - pa;
+        }
+        if (val === 'progress-low') {
+          const pa = parseInt(a.querySelector('.progress-fill').style.width) || 0;
+          const pb = parseInt(b.querySelector('.progress-fill').style.width) || 0;
+          return pa - pb;
+        }
+        return 0;
+      });
+
+      cards.forEach(c => grid.appendChild(c));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Library — AtelierX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A96E;
+      --gold-light: #e8d5b7;
+      --gold-dim: rgba(201,169,110,0.15);
+      --ink: #1a1a1a;
+      --ink2: #3a3a3a;
+      --muted: #888;
+      --surface: #faf8f5;
+      --white: #ffffff;
+      --sidebar-w: 240px;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR (same as dashboard) ── */
+    .sidebar { width: var(--sidebar-w); background: var(--ink); min-height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; padding: 28px 0 24px; z-index: 100; }
+    .sidebar-brand { padding: 0 24px 32px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-brand svg { height: 32px; }
+    .sidebar-user { display: flex; align-items: center; gap: 12px; padding: 20px 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #a07840); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--white); font-weight: 600; flex-shrink: 0; }
+    .user-meta span { display: block; color: var(--white); font-size: 13px; font-weight: 500; line-height: 1.2; }
+    .user-meta small { color: var(--gold); font-size: 11px; letter-spacing: 0.5px; }
+    .sidebar-nav { flex: 1; padding: 20px 0; list-style: none; }
+    .nav-section-label { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 14px 24px 6px; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; font-weight: 400; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-nav li a:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+    .sidebar-nav li a.active { color: var(--gold); border-left-color: var(--gold); background: rgba(201,169,110,0.08); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-bottom { padding: 16px 24px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-bottom a { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.4); font-size: 13px; text-decoration: none; padding: 8px 0; transition: color 0.2s; }
+    .sidebar-bottom a:hover { color: rgba(255,255,255,0.7); }
+
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+
+    /* ── TOPBAR ── */
+    .topbar { background: var(--white); border-bottom: 1px solid #ede9e2; padding: 0 36px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; }
+    .topbar-left h2 em { color: var(--gold); font-style: italic; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .search-bar { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid #e5e0d8; border-radius: 50px; padding: 7px 16px; min-width: 240px; }
+    .search-bar input { border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); width: 100%; }
+    .search-bar input::placeholder { color: var(--muted); }
+    .notif-btn { width: 38px; height: 38px; background: var(--surface); border: 1px solid #e5e0d8; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; position: relative; }
+    .notif-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; position: absolute; top: 6px; right: 6px; border: 2px solid var(--white); }
+
+    .page-body { padding: 32px 36px 48px; }
+
+    /* ── HERO BANNER ── */
+    .lib-banner { background: var(--ink); border-radius: var(--radius); padding: 28px 36px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; position: relative; overflow: hidden; }
+    .lib-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 50%, rgba(201,169,110,0.2) 0%, transparent 60%); }
+    .lib-banner-text { position: relative; }
+    .lib-banner-text p { color: var(--gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .lib-banner-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--white); }
+    .lib-banner-text h2 em { color: var(--gold); font-style: italic; }
+    .lib-banner-text small { color: rgba(255,255,255,0.45); font-size: 13px; display: block; margin-top: 4px; }
+    .lib-stats { display: flex; gap: 32px; position: relative; }
+    .lib-stat { text-align: center; }
+    .lib-stat strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); }
+    .lib-stat span { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    /* ── FILTER ROW ── */
+    .filter-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
+    .tabs { display: flex; gap: 4px; background: #ede9e2; border-radius: 10px; padding: 4px; width: fit-content; flex-wrap: wrap; }
+    .tab-btn { padding: 7px 16px; border: none; background: transparent; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: var(--white); color: var(--ink); font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .sort-select { border: 1px solid #e5e0d8; background: var(--white); border-radius: 8px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink2); outline: none; cursor: pointer; }
+
+    /* ── FEATURED VIDEO ── */
+    .featured-wrap { margin-bottom: 32px; }
+    .section-hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+    .section-hd h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+    .section-hd h3 em { color: var(--gold); font-style: italic; }
+    .section-hd a { font-size: 12px; color: var(--gold); text-decoration: none; }
+
+    .featured-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; gap: 0; cursor: pointer; transition: box-shadow 0.2s; }
+    .featured-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+    .featured-thumb { width: 420px; height: 240px; background: linear-gradient(135deg, #2c1f12, #6b4c2a); position: relative; flex-shrink: 0; }
+    .featured-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 60px; height: 60px; background: rgba(201,169,110,0.3); border: 2px solid rgba(201,169,110,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--white); transition: background 0.2s; }
+    .featured-card:hover .featured-play { background: rgba(201,169,110,0.6); }
+    .featured-dur { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.65); color: var(--white); font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+    .featured-badge { position: absolute; top: 12px; left: 12px; background: var(--gold); color: var(--white); font-size: 10px; padding: 4px 10px; border-radius: 5px; font-weight: 500; letter-spacing: 0.5px; }
+    .featured-info { padding: 28px 32px; display: flex; flex-direction: column; justify-content: center; }
+    .featured-tag { font-size: 11px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    .featured-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 8px; line-height: 1.3; }
+    .featured-info p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; }
+    .featured-meta { display: flex; gap: 18px; margin-bottom: 20px; flex-wrap: wrap; }
+    .f-meta { font-size: 12px; color: var(--ink2); display: flex; align-items: center; gap: 5px; }
+    .btn-watch { background: var(--ink); color: var(--white); border: none; padding: 10px 22px; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-watch:hover { background: #333; }
+
+    /* ── VIDEO GRID ── */
+    .video-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 40px; }
+    .video-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .video-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+    .video-thumb { height: 120px; position: relative; }
+    .vt1 { background: linear-gradient(135deg, #3d1f2c, #7a3a56); }
+    .vt2 { background: linear-gradient(135deg, #1f2d3d, #3a6070); }
+    .vt3 { background: linear-gradient(135deg, #2d2d1f, #6b6b35); }
+    .vt4 { background: linear-gradient(135deg, #1f3d2d, #356b54); }
+    .vt5 { background: linear-gradient(135deg, #2c1f12, #6b4c2a); }
+    .vt6 { background: linear-gradient(135deg, #1a2035, #3a4f7a); }
+    .vt7 { background: linear-gradient(135deg, #1f2c1a, #3a6b35); }
+    .vt8 { background: linear-gradient(135deg, #2c1a2c, #6b3a6b); }
+    .video-dur { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65); color: var(--white); font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .v-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; background: rgba(201,169,110,0.25); border: 1px solid rgba(201,169,110,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--white); transition: background 0.2s; }
+    .video-card:hover .v-play { background: rgba(201,169,110,0.55); }
+    .video-meta { padding: 12px 14px 14px; }
+    .video-meta h5 { font-size: 13px; font-weight: 500; line-height: 1.35; margin-bottom: 4px; }
+    .video-meta small { font-size: 11px; color: var(--muted); }
+    .video-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .v-tag { font-size: 10px; background: var(--gold-dim); color: #8a6535; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px; }
+    .v-save { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.4); border: none; color: rgba(255,255,255,0.7); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .v-save:hover { background: rgba(201,169,110,0.6); color: var(--white); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 60px; color: var(--muted); display: none; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) { .video-grid { grid-template-columns: repeat(3, 1fr); } .featured-thumb { width: 300px; } }
+    @media (max-width: 900px) { .video-grid { grid-template-columns: repeat(2, 1fr); } .featured-card { flex-direction: column; } .featured-thumb { width: 100%; } }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main { margin-left: 0; } .video-grid { grid-template-columns: repeat(2, 1fr); } .page-body { padding: 20px; } .topbar { padding: 0 20px; } .lib-stats { display: none; } }
+    @media (max-width: 500px) { .video-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ session.user.first_name[0] | upper }}</div>
+      <div class="user-meta">
+        <span>{{ session.user.first_name }} {{ session.user.last_name }}</span>
+        <small>{% if session.user.role == 'learner' %}🌸{% else %}✂️{% endif %} {{ session.user.role | capitalize }}</small>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="nav-section-label">Main</li>
+      <li><a href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a></li>
+      <li><a href="/my-courses"><span class="nav-icon">📚</span> My Courses</a></li>
+      <li><a href="/video-library" class="active"><span class="nav-icon">🎬</span> Video Library</a></li>
+      <li><a href="#"><span class="nav-icon">📁</span> My Portfolio</a></li>
+      <li class="nav-section-label">Opportunities</li>
+      <li><a href="#"><span class="nav-icon">🪡</span> Browse Gigs</a></li>
+      <li><a href="#"><span class="nav-icon">💼</span> My Applications</a></li>
+      <li><a href="#"><span class="nav-icon">⭐</span> Saved</a></li>
+    </ul>
+
+    <div class="sidebar-bottom">
+      <a href="#"><span>⚙️</span> Settings</a>
+      <a href="/logout"><span>🚪</span> Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2>Video <em>Library</em></h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" id="videoSearch" placeholder="Search videos, instructors…" oninput="filterVideos()"/>
+        </div>
+        <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+        <div class="user-avatar" style="width:36px;height:36px;font-size:15px">{{ session.user.first_name[0] | upper }}</div>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+  <!-- BANNER -->
+  <div class="lib-banner">
+    <div class="lib-banner-text">
+      <p>✦ Browse & Learn</p>
+      <h2>The Fashion <em>Video Library</em></h2>
+      <small>Videos from every enrolled course, all in one place.</small>
+    </div>
+    <div class="lib-stats">
+      <div class="lib-stat">
+        <strong>{{ total_videos }}</strong>
+        <span>Videos</span>
+      </div>
+      <div class="lib-stat">
+        <strong>{{ categories | length }}</strong>
+        <span>Categories</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER ROW -->
+  <div class="filter-row">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setTab(this, 'all')">All Videos</button>
+      {% for cat in categories %}
+      <button class="tab-btn" onclick="setTab(this, '{{ cat }}')">{{ cat }}</button>
+      {% endfor %}
+    </div>
+    <select class="sort-select" onchange="sortVideos(this.value)">
+      <option value="newest">Newest First</option>
+      <option value="az">A → Z</option>
+      <option value="duration-asc">Shortest First</option>
+    </select>
+  </div>
+
+  <!-- VIDEO GRID -->
+  <div class="section-hd">
+    <h3>All <em>Videos</em></h3>
+  </div>
+
+  {% if video_items %}
+  <div class="video-grid" id="videoGrid">
+    {% set thumb_classes = ['vt1','vt2','vt3','vt4','vt5','vt6','vt7','vt8'] %}
+    {% for v in video_items %}
+    <div class="video-card"
+         data-category="{{ v.category }}"
+         data-title="{{ v.title | lower }}">
+      <div class="video-thumb {{ thumb_classes[loop.index0 % 8] }}">
+        <button class="v-save">♡</button>
+        {% if v.video_path %}
+        <a href="{{ url_for('static', filename=v.video_path) }}"
+           target="_blank" style="display:contents;">
+          <div class="v-play">▶</div>
+        </a>
+        {% else %}
+        <div class="v-play" style="opacity:.4;cursor:not-allowed;">▶</div>
+        {% endif %}
+        <div class="video-dur">{{ v.duration }}</div>
+      </div>
+      <div class="video-meta">
+        <h5>{{ v.title }}</h5>
+        <small>{{ v.instructor }} · {{ v.course_title }}</small>
+        <div class="video-tags">
+          <span class="v-tag">{{ v.category }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state" style="display:block;">
+    <div class="empty-icon">🎬</div>
+    <h3>No videos yet</h3>
+    <p style="font-size:13px;margin-top:6px;">
+      Enrol in a course to see its lessons appear here.
+      <a href="/browse-gigs" style="color:var(--gold);">Browse Courses →</a>
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🎬</div>
+    <h3>No videos found</h3>
+    <p style="font-size:13px;margin-top:6px;">Try a different category or search term.</p>
+  </div>
+
+</div><!-- /page-body -->
+  </div><!-- /main -->
+
+  <script>
+  let currentTab = 'all';
+
+  function setTab(btn, filter) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab = filter;
+    applyFilters();
+  }
+
+  function filterVideos() { applyFilters(); }
+
+  function applyFilters() {
+    const query = (document.getElementById('videoSearch')?.value || '').toLowerCase();
+    const cards = document.querySelectorAll('.video-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const matchTab    = currentTab === 'all' || card.dataset.category === currentTab;
+      const matchSearch = card.dataset.title.includes(query);
+      const show = matchTab && matchSearch;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('emptyState').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function sortVideos(val) {
+    const grid  = document.getElementById('videoGrid');
+    if (!grid) return;
+    const cards = [...grid.querySelectorAll('.video-card')];
+    cards.sort((a, b) => {
+      if (val === 'az') return a.dataset.title.localeCompare(b.dataset.title);
+      if (val === 'duration-asc') {
+        const toSec = el => {
+          const t = el.querySelector('.video-dur').textContent.trim().split(':');
+          return parseInt(t[0]) * 60 + parseInt(t[1]);
+        };
+        return toSec(a) - toSec(b);
+      }
+      return 0;
+    });
+    cards.forEach(c => grid.appendChild(c));
+  }
+
+  document.querySelectorAll('.v-save').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      btn.textContent  = btn.textContent === '♡' ? '♥' : '♡';
+      btn.style.color  = btn.textContent === '♥' ? '#C9A96E' : '';
+    });
+  });
+</script>
+</body>
+</html>

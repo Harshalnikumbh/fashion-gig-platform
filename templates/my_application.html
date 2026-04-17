@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Applications — AtelierX</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ---- Dashboard Shell (same as Browse Gigs) ---- */
+    .dashboard-body { background: #f5f2ed; overflow-x: hidden; }
+    .shell { min-height: 100vh; }
+
+    .sidebar {
+      background: #1a1a1a; padding: 0;
+      position: fixed; top: 0; left: 0;
+      width: 240px; height: 100vh;
+      display: flex; flex-direction: column;
+      overflow-y: auto; z-index: 100;
+    }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .sidebar-user {
+      padding: 20px 24px; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #C9A96E, #a07840);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .user-info span { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.9); }
+    .user-info small { font-size: 11px; color: #C9A96E; }
+    .sidebar-section { padding: 20px 16px 8px; }
+    .sidebar-section-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,.25); padding: 0 8px; margin-bottom: 6px; display: block;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13.5px; color: rgba(255,255,255,.55);
+      text-decoration: none; transition: all .2s; margin-bottom: 2px; position: relative;
+    }
+    .sidebar-link:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.05); }
+    .sidebar-link.active {
+      color: #fff; background: rgba(201,169,110,.15);
+    }
+    .sidebar-link.active::before {
+      content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: #C9A96E;
+    }
+    .sidebar-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .main-content { margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .topbar {
+      background: #fff; padding: 16px 40px;
+      display: flex; align-items: center; gap: 20px;
+      border-bottom: 1px solid rgba(201,169,110,.15);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: #1a1a1a; margin-right: auto; }
+    .topbar-title em { font-style: italic; color: #C9A96E; }
+    .topbar-search {
+      display: flex; align-items: center; gap: 10px;
+      background: #f5f2ed; border: 1.5px solid rgba(201,169,110,.2);
+      border-radius: 50px; padding: 9px 18px; width: 260px; transition: border-color .2s;
+    }
+    .topbar-search:focus-within { border-color: #C9A96E; }
+    .topbar-search input {
+      border: none; background: none; outline: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; color: #1a1a1a; width: 100%;
+    }
+    .topbar-search input::placeholder { color: #a09080; }
+    .topbar-notif {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #f5f2ed; border: 1.5px solid rgba(201,169,110,.2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; transition: border-color .2s;
+    }
+    .topbar-notif:hover { border-color: #C9A96E; }
+    .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #C9A96E; border: 1.5px solid #fff; }
+    .topbar-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #C9A96E, #a07840);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; color: #fff; cursor: pointer;
+    }
+
+    .page-body { padding: 36px 40px; flex: 1; }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 20px; margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #fff; border-radius: 14px;
+      border: 1px solid rgba(201,169,110,.15);
+      padding: 22px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      display: flex; align-items: center; gap: 16px;
+      transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .si-gold { background: rgba(201,169,110,.12); }
+    .si-green { background: rgba(90,154,106,.12); }
+    .si-blue { background: rgba(90,159,194,.12); }
+    .si-red { background: rgba(200,90,90,.1); }
+
+    .stat-info span { display: block; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; color: #1a1a1a; line-height: 1; }
+    .stat-info small { font-size: 12px; color: #7a7060; }
+
+    /* TABS */
+    .tabs-bar {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: #fff; padding: 6px;
+      border-radius: 12px; border: 1px solid rgba(201,169,110,.15);
+      width: fit-content;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    .tab-btn {
+      padding: 9px 22px; border-radius: 8px;
+      border: none; background: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      color: #7a7060; transition: all .2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn:hover { color: #1a1a1a; }
+    .tab-btn.active { background: #1a1a1a; color: #fff; }
+    .tab-btn.active .tab-count { background: rgba(201,169,110,.3); }
+
+    .tab-count {
+      padding: 2px 8px; border-radius: 50px;
+      background: rgba(0,0,0,.08); font-size: 11px; font-weight: 600;
+    }
+
+    /* APPLICATION LIST */
+    .app-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .app-card {
+      background: #fff; border-radius: 14px;
+      border: 1px solid rgba(201,169,110,.15);
+      padding: 24px; display: flex; align-items: flex-start; gap: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      transition: transform .22s, box-shadow .22s;
+    }
+    .app-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.08); }
+
+    .app-thumb {
+      width: 72px; height: 72px; border-radius: 12px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
+    .at-bridal { background: linear-gradient(135deg, #f5ede0, #d4b48c); }
+    .at-couture { background: linear-gradient(135deg, #e8d5f5, #a07acd); }
+    .at-illustration { background: linear-gradient(135deg, #f0e8f5, #9a6ab5); }
+    .at-pattern { background: linear-gradient(135deg, #faf0e0, #c9a050); }
+    .at-sustainable { background: linear-gradient(135deg, #e0f5e8, #5a9a6a); }
+
+    .app-main { flex: 1; }
+
+    .app-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+
+    .app-gig-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px; font-weight: 400; color: #1a1a1a;
+    }
+
+    .app-status {
+      padding: 5px 14px; border-radius: 50px;
+      font-size: 11px; font-weight: 600; letter-spacing: .5px;
+      white-space: nowrap;
+    }
+    .status-pending { background: rgba(201,169,110,.12); color: #a07840; border: 1px solid rgba(201,169,110,.3); }
+    .status-shortlisted { background: rgba(90,154,194,.1); color: #3a7aaa; border: 1px solid rgba(90,154,194,.3); }
+    .status-accepted { background: rgba(90,154,106,.1); color: #2a7a4a; border: 1px solid rgba(90,154,106,.3); }
+    .status-rejected { background: rgba(200,90,90,.08); color: #aa3a3a; border: 1px solid rgba(200,90,90,.2); }
+
+    .app-meta-row {
+      display: flex; align-items: center; gap: 20px;
+      margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .app-meta-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #7a7060; }
+    .app-meta-item strong { color: #1a1a1a; font-weight: 500; }
+
+    .app-cover-preview {
+      font-size: 13px; color: #7a7060; line-height: 1.6;
+      padding: 12px 16px;
+      background: #faf7f2;
+      border-radius: 8px; border-left: 3px solid rgba(201,169,110,.4);
+      margin-bottom: 14px;
+    }
+
+    .app-footer {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+
+    .app-skills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .skill-tag {
+      padding: 3px 10px; border-radius: 50px;
+      background: #faf7f2; border: 1px solid rgba(201,169,110,.25);
+      font-size: 11px; color: #7a7060;
+    }
+
+    .app-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-sm {
+      padding: 8px 18px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-sm-outline {
+      border: 1.5px solid rgba(201,169,110,.4); background: none; color: #a07840;
+    }
+    .btn-sm-outline:hover { background: rgba(201,169,110,.08); border-color: #C9A96E; }
+    .btn-sm-dark {
+      background: #1a1a1a; color: #fff; border: none;
+    }
+    .btn-sm-dark:hover { background: #C9A96E; }
+    .btn-sm-gold {
+      background: #C9A96E; color: #fff; border: none;
+    }
+    .btn-sm-gold:hover { background: #a07840; }
+    .btn-sm-danger {
+      border: 1.5px solid rgba(200,90,90,.3); background: none; color: #aa3a3a;
+    }
+    .btn-sm-danger:hover { background: rgba(200,90,90,.06); }
+
+    .app-date { font-size: 11px; color: #a09080; }
+
+    /* TIMELINE INDICATOR */
+    .app-timeline {
+      display: flex; align-items: center; gap: 0;
+      margin: 12px 0 14px;
+    }
+    .tl-step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; position: relative;
+    }
+    .tl-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #e8e4de; border: 2px solid #d4cfc8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; z-index: 1;
+    }
+    .tl-dot.done { background: #C9A96E; border-color: #C9A96E; color: #fff; }
+    .tl-dot.active { background: #fff; border-color: #C9A96E; border-width: 2.5px; }
+    .tl-dot.rejected-dot { background: #e07070; border-color: #e07070; color: #fff; }
+    .tl-label { font-size: 10px; color: #a09080; margin-top: 5px; text-align: center; }
+    .tl-label.done-label { color: #C9A96E; }
+    .tl-connector {
+      position: absolute; top: 10px; left: 50%; width: 100%;
+      height: 2px; background: #e8e4de; z-index: 0;
+    }
+    .tl-connector.done { background: #C9A96E; }
+
+    /* EMPTY STATE */
+    .empty-tab {
+      text-align: center; padding: 80px 20px;
+    }
+    .empty-tab .empty-icon { font-size: 52px; margin-bottom: 20px; opacity: .6; }
+    .empty-tab h3 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: #1a1a1a; margin-bottom: 8px; }
+    .empty-tab p { font-size: 14px; color: #7a7060; margin-bottom: 24px; }
+    .btn-browse {
+      display: inline-block; padding: 12px 28px; border-radius: 50px;
+      background: #C9A96E; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      text-decoration: none; transition: all .2s;
+    }
+    .btn-browse:hover { background: #a07840; transform: translateY(-1px); }
+
+    /* MESSAGE MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff; border-radius: 16px;
+      padding: 32px; width: 100%; max-width: 520px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.2);
+      animation: slideUp .3s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; margin-bottom: 6px; }
+    .modal p { font-size: 13px; color: #7a7060; margin-bottom: 20px; }
+    .modal textarea {
+      width: 100%; padding: 14px 16px; border-radius: 10px;
+      border: 1.5px solid rgba(201,169,110,.25);
+      font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+      color: #1a1a1a; resize: vertical; min-height: 120px; outline: none;
+      transition: border-color .2s;
+    }
+    .modal textarea:focus { border-color: #C9A96E; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 16px; justify-content: flex-end; }
+    .btn-cancel {
+      padding: 10px 22px; border-radius: 50px;
+      border: 1.5px solid rgba(0,0,0,.12); background: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-cancel:hover { border-color: #C9A96E; color: #a07840; }
+    .btn-send {
+      padding: 10px 22px; border-radius: 50px;
+      background: #1a1a1a; color: #fff; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-send:hover { background: #C9A96E; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .topbar, .page-body { padding-left: 20px; padding-right: 20px; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .app-card { flex-direction: column; }
+      .app-header { flex-direction: column; gap: 10px; }
+    }
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="dashboard-body">
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px">
+        <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+        <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+        <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar">S</div>
+      <div class="user-info">
+        <span>Sanjivani Sharma</span>
+        <small>🌸 Learner</small>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Main</span>
+      <a href="/dashboard" class="sidebar-link"><span class="sidebar-icon">🏠</span> Dashboard</a>
+      <a href="/my-courses" class="sidebar-link"><span class="sidebar-icon">🎓</span> My Courses</a>
+      <a href="/video-library" class="sidebar-link"><span class="sidebar-icon">🎬</span> Video Library</a>
+      <a href="/portfolio" class="sidebar-link"><span class="sidebar-icon">📁</span> My Portfolio</a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Opportunities</span>
+      <a href="/browse-gigs" class="sidebar-link"><span class="sidebar-icon">🪡</span> Browse Gigs</a>
+      <a href="/my-applications" class="sidebar-link active"><span class="sidebar-icon">📋</span> My Applications</a>
+      <a href="/saved" class="sidebar-link"><span class="sidebar-icon">⭐</span> Saved</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <h1 class="topbar-title">My <em>Applications</em></h1>
+      <div class="topbar-search">
+        <span>🔍</span>
+        <input type="text" placeholder="Search applications..." oninput="searchApps(this.value)"/>
+      </div>
+      <div class="topbar-notif">🔔<span class="notif-dot"></span></div>
+      <div class="topbar-avatar">S</div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon si-gold">📋</div>
+          <div class="stat-info"><span>7</span><small>Total Applied</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-blue">🔍</div>
+          <div class="stat-info"><span>2</span><small>Shortlisted</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-green">✅</div>
+          <div class="stat-info"><span>1</span><small>Accepted</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon si-red">⏳</div>
+          <div class="stat-info"><span>3</span><small>Under Review</small></div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'all')">All <span class="tab-count">7</span></button>
+        <button class="tab-btn" onclick="switchTab(this, 'pending')">Under Review <span class="tab-count">3</span></button>
+        <button class="tab-btn" onclick="switchTab(this, 'shortlisted')">Shortlisted <span class="tab-count">2</span></button>
+        <button class="tab-btn" onclick="switchTab(this, 'accepted')">Accepted <span class="tab-count">1</span></button>
+        <button class="tab-btn" onclick="switchTab(this, 'rejected')">Not Selected <span class="tab-count">1</span></button>
+      </div>
+
+      <!-- APPLICATION LIST -->
+      <div class="app-list" id="appList">
+
+        <!-- ACCEPTED -->
+        <div class="app-card" data-status="accepted">
+          <div class="app-thumb at-illustration">🖋️</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Fashion Flat Sketches — Lookbook</h3>
+              <span class="app-status status-accepted">✦ Accepted</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Illustration</strong></span>
+              <span class="app-meta-item">💰 <strong>₹6,000 – ₹10,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Priya Designs Co.</strong></span>
+              <span class="app-date">Applied 12 Apr 2026</span>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Reviewed</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Shortlisted</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Accepted</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "Hi, I'm Sanjivani. I have 2 years of experience with Adobe Illustrator and have completed a fashion illustration course on AtelierX. I'd love to create these lookbook flats for you..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Flat Sketches</span>
+                <span class="skill-tag">Illustrator</span>
+                <span class="skill-tag">Digital</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-outline" onclick="openModal('Priya Designs Co.', 'Fashion Flat Sketches')">💬 Message Client</button>
+                <button class="btn-sm btn-sm-gold">🎉 View Contract</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHORTLISTED 1 -->
+        <div class="app-card" data-status="shortlisted">
+          <div class="app-thumb at-bridal">👗</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Bridal Lehenga Collection Designer</h3>
+              <span class="app-status status-shortlisted">🔍 Shortlisted</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Bridal & Wedding</strong></span>
+              <span class="app-meta-item">💰 <strong>₹25,000 – ₹40,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Roshan Bridal House</strong></span>
+              <span class="app-date">Applied 10 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Reviewed</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot active"></div>
+                <span class="tl-label" style="color:#3a7aaa;">Shortlisted</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Decision</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "I've been specializing in bridal wear for the past year and recently completed AtelierX's Draping Fundamentals course. I'm passionate about creating heirloom-quality pieces..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Embroidery</span>
+                <span class="skill-tag">Draping</span>
+                <span class="skill-tag">Bridal</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-outline" onclick="openModal('Roshan Bridal House', 'Bridal Lehenga Collection')">💬 Message</button>
+                <button class="btn-sm btn-sm-dark">View Application</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHORTLISTED 2 -->
+        <div class="app-card" data-status="shortlisted">
+          <div class="app-thumb at-sustainable">🌿</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Upcycled Capsule Collection Designer</h3>
+              <span class="app-status status-shortlisted">🔍 Shortlisted</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Sustainable Fashion</strong></span>
+              <span class="app-meta-item">💰 <strong>₹18,000 – ₹28,000</strong></span>
+              <span class="app-meta-item">👤 <strong>EcoThreads India</strong></span>
+              <span class="app-date">Applied 9 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Reviewed</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot active"></div>
+                <span class="tl-label" style="color:#3a7aaa;">Shortlisted</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Decision</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "Sustainability is my core design philosophy. I've worked with deadstock fabrics and zero-waste techniques in 3 personal projects, and I believe this gig is a perfect match..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Zero Waste</span>
+                <span class="skill-tag">Upcycling</span>
+                <span class="skill-tag">Sustainable</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-outline" onclick="openModal('EcoThreads India', 'Upcycled Capsule Collection')">💬 Message</button>
+                <button class="btn-sm btn-sm-dark">View Application</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENDING 1 -->
+        <div class="app-card" data-status="pending">
+          <div class="app-thumb at-pattern">📐</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Kurtis Pattern Set — Ready to Wear</h3>
+              <span class="app-status status-pending">⏳ Under Review</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Pattern Making</strong></span>
+              <span class="app-meta-item">💰 <strong>₹10,000 – ₹18,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Label Aranya</strong></span>
+              <span class="app-date">Applied 8 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot active"></div>
+                <span class="tl-label" style="color:#a07840;">Under Review</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Shortlisted</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Decision</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "I've completed 2 pattern-making certifications and recently finished AtelierX's Zero to Pro Patterns course scoring 94%. I can deliver all 15 patterns with proper grading within 10 days..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Grading</span>
+                <span class="skill-tag">CAD</span>
+                <span class="skill-tag">RTW</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-danger" onclick="withdrawApp(this)">Withdraw</button>
+                <button class="btn-sm btn-sm-dark">Edit Application</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENDING 2 -->
+        <div class="app-card" data-status="pending">
+          <div class="app-thumb at-couture">✨</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Evening Gown Collection — Paris Showcase</h3>
+              <span class="app-status status-pending">⏳ Under Review</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Haute Couture</strong></span>
+              <span class="app-meta-item">💰 <strong>₹50,000 – ₹75,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Maison Éclat</strong></span>
+              <span class="app-date">Applied 7 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot active"></div>
+                <span class="tl-label" style="color:#a07840;">Under Review</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Shortlisted</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Decision</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "This is a dream opportunity. I've always aspired to contribute to an international couture showcase. My portfolio includes 3 evening gown designs with beadwork and I'm confident..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Haute Couture</span>
+                <span class="skill-tag">Beadwork</span>
+                <span class="skill-tag">Toile</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-danger" onclick="withdrawApp(this)">Withdraw</button>
+                <button class="btn-sm btn-sm-dark">Edit Application</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PENDING 3 -->
+        <div class="app-card" data-status="pending">
+          <div class="app-thumb at-bridal" style="background: linear-gradient(135deg, #fce8d5, #c97a50);">👜</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Handcrafted Leather Bag Collection</h3>
+              <span class="app-status status-pending">⏳ Under Review</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Accessories</strong></span>
+              <span class="app-meta-item">💰 <strong>₹7,000 – ₹12,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Kinnara Craft</strong></span>
+              <span class="app-date">Applied 5 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot active"></div>
+                <span class="tl-label" style="color:#a07840;">Under Review</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Shortlisted</span>
+                <div class="tl-connector"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot"></div>
+                <span class="tl-label">Decision</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview">
+              "My background in accessories design includes leather goods and I've created 3D renders for bag prototypes. I'd love to contribute original silhouettes to this artisan collection..."
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Leather</span>
+                <span class="skill-tag">3D Renders</span>
+                <span class="skill-tag">Accessories</span>
+              </div>
+              <div class="app-actions">
+                <button class="btn-sm btn-sm-danger" onclick="withdrawApp(this)">Withdraw</button>
+                <button class="btn-sm btn-sm-dark">Edit Application</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REJECTED -->
+        <div class="app-card" data-status="rejected" style="opacity:.75;">
+          <div class="app-thumb at-couture" style="filter:grayscale(.4)">🧵</div>
+          <div class="app-main">
+            <div class="app-header">
+              <h3 class="app-gig-title">Streetwear Drop — 6-Piece Collection</h3>
+              <span class="app-status status-rejected">✗ Not Selected</span>
+            </div>
+            <div class="app-meta-row">
+              <span class="app-meta-item">📌 <strong>Streetwear</strong></span>
+              <span class="app-meta-item">💰 <strong>₹8,000 – ₹15,000</strong></span>
+              <span class="app-meta-item">👤 <strong>Urban Drip Studio</strong></span>
+              <span class="app-date">Applied 3 Apr 2026</span>
+            </div>
+
+            <div class="app-timeline">
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Applied</span>
+                <div class="tl-connector done"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot done">✓</div>
+                <span class="tl-label done-label">Reviewed</span>
+                <div class="tl-connector" style="background:#e07070"></div>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot rejected-dot">✗</div>
+                <span class="tl-label" style="color:#aa3a3a;">Not Selected</span>
+              </div>
+              <div class="tl-step">
+                <div class="tl-dot" style="opacity:.3;"></div>
+                <span class="tl-label" style="opacity:.3;">—</span>
+              </div>
+            </div>
+
+            <div class="app-cover-preview" style="border-left-color: rgba(200,90,90,.3);">
+              <em style="color:#aa3a3a; font-style:normal; font-size:12px;">Feedback from client:</em> "Thank you for applying. We loved your work but went with a candidate with more streetwear-specific experience. We'd love to see you apply again!"
+            </div>
+            <div class="app-footer">
+              <div class="app-skills">
+                <span class="skill-tag">Tech Packs</span>
+                <span class="skill-tag">Graphics</span>
+              </div>
+              <div class="app-actions">
+                <a href="/browse-gigs" class="btn-sm btn-sm-outline" style="text-decoration:none;">Browse Similar Gigs</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end app-list -->
+
+    </div><!-- end page-body -->
+  </div><!-- end main-content -->
+</div><!-- end shell -->
+
+<!-- MESSAGE MODAL -->
+<div class="modal-overlay" id="messageModal">
+  <div class="modal">
+    <h3>Message <em id="modalClient" style="color:#C9A96E; font-style:italic;"></em></h3>
+    <p>Re: <span id="modalGig"></span></p>
+    <textarea placeholder="Type your message here..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-send" onclick="sendMessage()">Send Message →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(btn, status) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.app-card');
+    cards.forEach(card => {
+      if (status === 'all' || card.dataset.status === status) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function searchApps(val) {
+    const v = val.toLowerCase();
+    document.querySelectorAll('.app-card').forEach(card => {
+      const title = card.querySelector('.app-gig-title').textContent.toLowerCase();
+      card.style.display = title.includes(v) ? '' : 'none';
+    });
+  }
+
+  function withdrawApp(btn) {
+    if (!confirm('Are you sure you want to withdraw this application?')) return;
+    const card = btn.closest('.app-card');
+    card.style.transition = 'opacity .4s, transform .4s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(30px)';
+    setTimeout(() => card.remove(), 420);
+  }
+
+  function openModal(client, gig) {
+    document.getElementById('modalClient').textContent = client;
+    document.getElementById('modalGig').textContent = gig;
+    document.getElementById('messageModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('messageModal').classList.remove('open');
+  }
+
+  function sendMessage() {
+    closeModal();
+    // Would wire to backend
+  }
+
+  document.getElementById('messageModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Scroll reveal
+  window.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.app-card, .stat-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, 80 * Array.from(cards).indexOf(entry.target));
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.06 });
+
+    cards.forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(18px)';
+      card.style.transition = 'opacity .5s ease, transform .5s ease';
+      observer.observe(card);
+    });
+  });
+</script>
+
+</body>
+</html>
