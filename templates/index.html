@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AtelierX — Fashion Design & Learning Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <svg class="logo-svg" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Needle & thread icon -->
+        <g>
+          <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+          <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+          <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        </g>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#1a1a1a">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#community">Community</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="/signin" class="btn-ghost">Sign In</a>
+      <a href="/signup" class="btn-gold">Join Free</a>
+    </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <span class="hero-label">Fashion Design · Learn · Create · Hire</span>
+      <h1 class="hero-title">Where Fashion<br/><em>Finds Its Voice</em></h1>
+      <p class="hero-sub">Learn from master designers. Post your gigs. Build your fashion career — all in one elegant platform.</p>
+      <div class="hero-btns">
+        <a href="/signup?role=learner" class="btn-gold-lg">Start Learning</a>
+        <a href="/signup?role=creator" class="btn-outline-lg">Become a Creator</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span>12K+</span><small>Learners</small></div>
+        <div class="stat-sep"></div>
+        <div class="stat"><span>840+</span><small>Courses</small></div>
+        <div class="stat-sep"></div>
+        <div class="stat"><span>3.2K</span><small>Gig Projects</small></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card card-1">
+        <svg viewBox="0 0 180 220" fill="none" xmlns="http://www.w3.org/2000/svg" class="fashion-svg">
+          <!-- Dress silhouette -->
+          <path d="M90 20 C75 30 60 55 55 80 L40 190 H140 L125 80 C120 55 105 30 90 20Z" fill="#f5ede0" stroke="#C9A96E" stroke-width="1.2"/>
+          <path d="M70 20 Q90 40 110 20" stroke="#C9A96E" stroke-width="1" fill="none"/>
+          <line x1="90" y1="20" x2="90" y2="70" stroke="#C9A96E" stroke-width="0.8" stroke-dasharray="4,3"/>
+          <!-- Collar detail -->
+          <path d="M75 22 Q90 35 105 22" fill="#e8d5b7" stroke="#C9A96E" stroke-width="1"/>
+          <!-- Waist line -->
+          <line x1="60" y1="100" x2="120" y2="100" stroke="#C9A96E" stroke-width="0.6" stroke-dasharray="5,4"/>
+        </svg>
+        <p class="card-label">Evening Couture</p>
+      </div>
+      <div class="hero-card card-2">
+        <div class="mini-course">
+          <div class="mini-thumb"></div>
+          <div class="mini-info">
+            <span>Draping Techniques</span>
+            <small>by Meera Kapoor</small>
+          </div>
+          <div class="mini-badge">⭐ 4.9</div>
+        </div>
+        <div class="mini-course">
+          <div class="mini-thumb t2"></div>
+          <div class="mini-info">
+            <span>Pattern Mastery</span>
+            <small>by Arjun Mehta</small>
+          </div>
+          <div class="mini-badge">⭐ 4.8</div>
+        </div>
+      </div>
+      <div class="hero-card card-3">
+        <div class="gig-tag">🪡 Gig Available</div>
+        <p class="gig-title">Bridal Collection Designer</p>
+        <span class="gig-budget">₹15,000 – ₹40,000</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="about">
+    <div class="about-inner">
+      <div class="about-text">
+        <span class="section-tag">About AtelierX</span>
+        <h2>The Platform <em>Fashion Creatives</em> Deserve</h2>
+        <p>AtelierX bridges the gap between passionate fashion learners and world-class design educators. Whether you're Sanjivani exploring your first draping technique or a seasoned couturier posting a bridal gig — AtelierX is your runway.</p>
+        <ul class="about-list">
+          <li><span class="icon-dot"></span>Video-based courses from professional designers</li>
+          <li><span class="icon-dot"></span>Real gig marketplace for fashion projects</li>
+          <li><span class="icon-dot"></span>Two-sided ecosystem: Learn & Earn</li>
+          <li><span class="icon-dot"></span>Community critiques & style boards</li>
+        </ul>
+      </div>
+      <div class="about-visual">
+        <div class="about-pill pill-1">🎓 Learn at your pace</div>
+        <div class="about-pill pill-2">🪡 Post & Find Gigs</div>
+        <div class="about-pill pill-3">📹 Video Courses</div>
+        <div class="about-circle">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" stroke="#C9A96E" stroke-width="0.8" stroke-dasharray="8,6"/>
+            <circle cx="100" cy="100" r="60" stroke="#C9A96E" stroke-width="0.5" opacity="0.5"/>
+            <!-- Scissors icon -->
+            <g transform="translate(70,70)">
+              <circle cx="12" cy="12" r="8" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+              <circle cx="48" cy="12" r="8" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+              <path d="M18 16 L42 44" stroke="#C9A96E" stroke-width="2" stroke-linecap="round"/>
+              <path d="M42 16 L18 44" stroke="#C9A96E" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how-it-works">
+    <span class="section-tag center">How It Works</span>
+    <h2 class="center">Two Ways to <em>Thrive</em></h2>
+    <div class="how-grid">
+      <div class="how-card learner">
+        <div class="how-icon">🌸</div>
+        <h3>For Learners</h3>
+        <p class="how-eg">Like Sanjivani —</p>
+        <ol class="how-steps">
+          <li>Sign up as a <strong>Learner</strong></li>
+          <li>Browse & enroll in fashion courses</li>
+          <li>Browse gig opportunities posted by creators</li>
+          <li>Build your portfolio & get hired</li>
+        </ol>
+        <a href="/signup?role=learner" class="btn-gold">Join as Learner</a>
+      </div>
+      <div class="how-divider">
+        <svg viewBox="0 0 2 120" fill="none"><line x1="1" y1="0" x2="1" y2="120" stroke="#C9A96E" stroke-width="1" stroke-dasharray="6,5"/></svg>
+      </div>
+      <div class="how-card creator">
+        <div class="how-icon">✂️</div>
+        <h3>For Creators</h3>
+        <p class="how-eg">Designers & Educators —</p>
+        <ol class="how-steps">
+          <li>Sign up as a <strong>Creator</strong></li>
+          <li>Upload video courses & set pricing</li>
+          <li>Post fashion gig jobs & projects</li>
+          <li>Earn & grow your design business</li>
+        </ol>
+        <a href="/signup?role=creator" class="btn-outline">Join as Creator</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE TEASER -->
+  <section class="explore-section" id="explore">
+    <span class="section-tag center">Explore</span>
+    <h2 class="center">Trending on <em>AtelierX</em></h2>
+    <div class="courses-grid">
+      <div class="course-card">
+        <div class="course-thumb ct1"></div>
+        <div class="course-meta">
+          <span class="course-tag">Draping</span>
+          <h4>Fundamentals of Fabric Draping</h4>
+          <div class="course-footer"><span>₹1,299</span><small>⭐ 4.9 · 2.1k enrolled</small></div>
+        </div>
+      </div>
+      <div class="course-card">
+        <div class="course-thumb ct2"></div>
+        <div class="course-meta">
+          <span class="course-tag">Pattern Making</span>
+          <h4>Zero to Pro: Garment Patterns</h4>
+          <div class="course-footer"><span>₹2,499</span><small>⭐ 4.8 · 1.4k enrolled</small></div>
+        </div>
+      </div>
+      <div class="course-card">
+        <div class="course-thumb ct3"></div>
+        <div class="course-meta">
+          <span class="course-tag">Illustration</span>
+          <h4>Fashion Illustration for Beginners</h4>
+          <div class="course-footer"><span>₹999</span><small>⭐ 4.7 · 3.8k enrolled</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner">
+    <div class="cta-inner">
+      <h2>Ready to Begin Your <em>Fashion Journey?</em></h2>
+      <p>Join thousands of learners and creators shaping the future of fashion.</p>
+      <div class="cta-btns">
+        <a href="/signup?role=learner" class="btn-gold-lg">I'm a Learner</a>
+        <a href="/signup?role=creator" class="btn-outline-lg light">I'm a Creator</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px">
+        <g>
+          <circle cx="12" cy="20" r="7" stroke="#C9A96E" stroke-width="1.5" fill="none"/>
+          <circle cx="12" cy="20" r="2" fill="#C9A96E"/>
+          <path d="M19 14 Q34 4 28 28 Q24 38 38 32" stroke="#C9A96E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        </g>
+        <text x="44" y="26" font-family="'Cormorant Garamond', serif" font-size="22" font-weight="300" letter-spacing="3" fill="#fff">ATELIER<tspan font-weight="600" fill="#C9A96E">X</tspan></text>
+      </svg>
+      <p>Fashion Design · Learn · Create · Hire</p>
+    </div>
+    <div class="footer-links">
+      <div><strong>Platform</strong><a href="#">Courses</a><a href="#">Gigs</a><a href="#">Community</a></div>
+      <div><strong>Company</strong><a href="#about">About</a><a href="#">Careers</a><a href="#">Blog</a></div>
+      <div><strong>Support</strong><a href="#">Help Center</a><a href="#">Contact</a><a href="#">Privacy</a></div>
+    </div>
+    <p class="footer-copy">© 2025 AtelierX. Crafted with care.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
